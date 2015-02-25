@@ -97,62 +97,39 @@ def depthFirstSearch(problem):
 # which are required for compatibility with the autograder.
 #      caling from registerInitialState of searchAgents.py
     "*** YOUR CODE HERE ***"
-    # util.raiseNotDefined()
-    # from game import Directions
-    # n = Directions.NORTH
-    # s = Directions.SOUTH
-    # w = Directions.WEST
-    # w = Directions.EAST
-    # stop = Directions.STOP
-    # reverse = Directions.REVERSE
-    # l = Directions.LEFT
-    # r = Directions.RIGHT
-    # print "problem type = " + str(type(problem))
+
     print "Start:", problem.getStartState()
     # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())#, "type of " , type(problem.getSuccessors(problem.getStartState()))
 
     # code providing pseudocode
-    # closed = util.Stack() # push /  pop / isEmpty ...
-    closed = set([])
 
     # fringe = problem.getSuccessors(problem.getStartState())
     fringe = util.Stack()
     # fringe.push(problem.getStartState())
-    for moving in problem.getSuccessors(problem.getStartState()):
-        fringe.push(moving)
+    # for moving in problem.getSuccessors(problem.getStartState()):
+    for moving in sorted(problem.getSuccessors(problem.getStartState()), reverse=True):
+        # fringe.push(moving)
+        fringe.push( (moving[0], [moving[1]], moving[2]) )
 
-    # print "start fringe: ", fringe
-    # for moving in fringe:
-    #     if not len(fringe):
-    #         print "Failure!"
-    #         return []
-    #     actions = [moving[1]]
-    #     print "moving: ", moving#, "go to", moving[0]
-    #     fringe.remove(moving)
-    #     if problem.isGoalState(moving[0]):
-    #         return moving
-    #     if moving[0] not in closed:
-    #         closed.add(moving[0])
-    #         # for child in problem.getSuccessors(moving[0]):
-    #         #     pass
-    #         fringe.extend(problem.getSuccessors(moving[0]))
-    #     print "closed: %s" % closed
-    #     print "fringe: %s" % fringe
+    closed = {}
     actions = []
     while not fringe.isEmpty():
         moving = fringe.pop()
-        # actions = [moving[1]]
-        # actions.append( moving[1] )
+        # if moving[0] in closed:
+        if moving[0] in closed.keys():
+            actions = closed[moving[0]]
+
         if problem.isGoalState(moving[0]):
-            actions.append( moving[1] )
+            # actions.append( moving[1] )
+            actions = moving[1]
             break
         # if moving not in closed:
-        if moving[0] not in closed:
+        if moving[0] not in closed.keys():
             print "moving: ", moving#, "go to", moving[0]
             actions.append( moving[1] )
-            # closed.add(moving)
-            closed.add(moving[0])
+            # closed.add(moving[0])
+            closed[moving[0]] = actions
             # print "sorted successors", sorted(problem.getSuccessors(moving[0]))
             print "sorted successors", sorted(problem.getSuccessors(moving[0]), reverse=True)
             # for child in sorted(problem.getSuccessors(moving[0])):
@@ -162,8 +139,7 @@ def depthFirstSearch(problem):
                 # fringe.push(child)
                 if child[0] not in closed:
                     print "push %s" % str(child)
-                    fringe.push(child)
-                    deadend = False
+                    fringe.push( (child[0], moving[1]+ [child[1]], child[2]) )
             if deadend:
                 actions.pop()
         print "closed: %s" % closed
@@ -172,7 +148,7 @@ def depthFirstSearch(problem):
         print "Failure!"
         return []
     print "RETURN ", actions
-    # tests:
+    # insert these as arguments for pacman.py for tests (run - edit configuration using PyCharm)
     # -l tinyMaze -p SearchAgent
     # -l mediumMaze -p SearchAgent
     # -l bigMaze -z .5 -p SearchAgent
