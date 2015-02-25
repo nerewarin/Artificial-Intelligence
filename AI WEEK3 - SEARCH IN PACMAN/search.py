@@ -152,7 +152,7 @@ def depthFirstSearch(problem):
     # -l tinyMaze -p SearchAgent
     # -l mediumMaze -p SearchAgent
     # -l bigMaze -z .5 -p SearchAgent
-    return  actions
+    return  actions 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
