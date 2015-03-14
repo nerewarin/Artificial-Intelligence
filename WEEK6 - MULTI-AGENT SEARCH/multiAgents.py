@@ -86,11 +86,16 @@ class ReflexAgent(Agent):
             # ['__doc__', '__eq__', '__hash__', '__init__', '__module__', '__str__', 'configuration',
             # 'copy', 'getDirection', 'getPosition', 'isPacman', 'numCarrying', 'numReturned', 'scaredTimer', 'start']
             ghostDist =  min(ghostDist, manhattanDistance(newPos, ghostState.getPosition()))
+        penalty = 0
         if ghostDist < 2:
-            ghostDist = 0
+            penalty = 1000
+
+        # eat food?
+        # if newFood[newPos[0]][newPos[[1]:
+        #
 
         # compute dist to closest food
-        foodDist = "inf"
+        foodDist = 1000
         for food in newFood.asList():
             # print type(newFood), dir(newFood)
             #<type 'instance'>
@@ -106,7 +111,8 @@ class ReflexAgent(Agent):
         # return successorGameState.getScore()  +  1.0/newFood.count()
         # return 0.1*ghostDist - newFood.count()
         # return ghostDist - 2*foodDist
-        return 1.0/ghostDist + 1.0/foodDist
+        return successorGameState.getScore() - penalty - 0.01*foodDist
+        # return 0.5*(ghostDist - foodDist) + successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
     """
