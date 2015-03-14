@@ -105,7 +105,8 @@ class ReflexAgent(Agent):
         # return successorGameState.getScore()  + sum(newScaredTimes) #+ 1/foodDist
         # return successorGameState.getScore()  +  1.0/newFood.count()
         # return 0.1*ghostDist - newFood.count()
-        return ghostDist - 2*foodDist
+        # return ghostDist - 2*foodDist
+        return 1.0/ghostDist + 1.0/foodDist
 
 def scoreEvaluationFunction(currentGameState):
     """
