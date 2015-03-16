@@ -75,8 +75,6 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        # return successorGameState.getScore()
-        # foodDist = manhattanDistance(newPos, newFood)
 
         # compute dist to closest ghost
         ghostDist = "inf"
@@ -90,9 +88,6 @@ class ReflexAgent(Agent):
         if ghostDist < 2:
             penalty = 1000
 
-        # eat food?
-        # if newFood[newPos[0]][newPos[[1]:
-        #
 
         # compute dist to closest food
         foodDist = 1000
@@ -173,7 +168,45 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # pacActions =  gameState.getLegalActions(0)
+        # ghost1Actions = gameState.getLegalActions(1)
+        # ghost2Actions = gameState.getLegalActions(2)
+        # print "self.evaluationFunction", self.evaluationFunction
+        print "func_name evaluationFunction", self.evaluationFunction.func_name
+        # print "dir self.evaluationFunction", dir(self.evaluationFunction)
+        # ['__call__', '__class__', '__closure__', '__code__', '__defaults__', '__delattr__', '__dict__',
+        #  '__doc__', '__format__', '__get__', '__getattribute__', '__globals__', '__hash__', '__init__',
+        # '__module__', '__name__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__',
+        #  '__sizeof__', '__str__', '__subclasshook__',
+        # 'func_closure', 'func_code', 'func_defaults', 'func_dict', 'func_doc', 'func_globals', 'func_name']
+
+        # print "pacActions = %s ,ghost1Actions = %s , ghost2Actions = %s " % (pacActions, ghost1Actions, ghost2Actions)
+        print "gameState.getNumAgents()", gameState.getNumAgents()
+        # print "self.evaluationFunction(gameState)", self.evaluationFunction(gameState)
+        state = gameState
+        # fringe = util.Queue()
+        # fringe.push(
+        # closed = [start_state]
+        for ply in xrange(self.depth):
+
+
+            # actions = [state.getLegalActions(agent_num) for agent_num in xrange(state.getNumAgents())]
+            # print "actions", actions
+            #
+            # # compute minimax
+            # score = "-inf"
+            # # # pacman step
+            # for pacAction in actions[0]:
+            #     print "pacAction", pacAction
+            #     state = gameState.generateSuccessor(0, pacAction)
+
+            # universal cycle but..who min who max?...
+            for agent_num in xrange(gameState.getNumAgents()):
+                for action in actions[agent_num]:
+                    new_state = state.generateSuccessor(agent_num, action)
+
+            # call evaluation function
+            # self.evaluationFunction(state)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """

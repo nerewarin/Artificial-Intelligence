@@ -98,71 +98,178 @@ def depthFirstSearch(problem):
 #      caling from registerInitialState of searchAgents.py
     "*** YOUR CODE HERE ***"
 
-    print "Start:", problem.getStartState()
+    start_state =  problem.getStartState()
+    start_successors = problem.getSuccessors(start_state)
+    # print "Start:", start_state
     # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())#, "type of " , type(problem.getSuccessors(problem.getStartState()))
+    # print "Start's successors:", start_successors
 
-    # code providing pseudocode
-
-    # fringe = problem.getSuccessors(problem.getStartState())
     fringe = util.Stack()
-    # fringe.push(problem.getStartState())
-    # for moving in problem.getSuccessors(problem.getStartState()):
-    for moving in sorted(problem.getSuccessors(problem.getStartState()), reverse=True):
-        # fringe.push(moving)
+    for moving in start_successors:
         fringe.push( (moving[0], [moving[1]], moving[2]) )
 
-    closed = {}
-    actions = []
+    closed = [start_state]
+
     while not fringe.isEmpty():
         moving = fringe.pop()
-        # if moving[0] in closed:
-        if moving[0] in closed.keys():
-            actions = closed[moving[0]]
-
         if problem.isGoalState(moving[0]):
-            # actions.append( moving[1] )
-            actions = moving[1]
-            break
-        # if moving not in closed:
-        if moving[0] not in closed.keys():
-            print "moving: ", moving#, "go to", moving[0]
-            actions.append( moving[1] )
-            # closed.add(moving[0])
-            closed[moving[0]] = actions
-            # print "sorted successors", sorted(problem.getSuccessors(moving[0]))
-            print "sorted successors", sorted(problem.getSuccessors(moving[0]), reverse=True)
-            # for child in sorted(problem.getSuccessors(moving[0])):
-            deadend = True
-            for child in sorted(problem.getSuccessors(moving[0]), reverse=True):
+            # print "RETURN ", moving[1]
+            return moving[1]
+        # print "moving: ", moving#, "go to", moving[0]
+        closed.append(moving[0])
+        # print "closed: %s" % closed
+        successors = problem.getSuccessors(moving[0])
+        # print "sorted successors", successors
+        for child in successors:
+            if child[0] not in closed:
                 # print "push %s" % str(child)
-                # fringe.push(child)
-                if child[0] not in closed:
-                    print "push %s" % str(child)
-                    fringe.push( (child[0], moving[1]+ [child[1]], child[2]) )
-            if deadend:
-                actions.pop()
-        print "closed: %s" % closed
-        # print "fringe: %s" % fringe
+                fringe.push( (child[0], moving[1]+ [child[1]], child[2]) )
     else:
         print "Failure!"
         return []
-    print "RETURN ", actions
     # insert these as arguments for pacman.py for tests (run - edit configuration using PyCharm)
     # -l tinyMaze -p SearchAgent
     # -l mediumMaze -p SearchAgent
     # -l bigMaze -z .5 -p SearchAgent
-    return  actions 
+    # autograder.py arguments: -q q1
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state =  problem.getStartState()
+    # print "Start:", start_state, "len of", len(start_state), "last is", start_state[-1]
+
+    ## if hasattr(start_state, '__call__'):
+    # if type(start_state) == list:
+    #     # print "start state is callable, start_state[0] = ", start_state[0]
+    #     print "start state is list, start_state[0] = ", start_state[0]
+    #     start_successors = problem.getSuccessors(start_state[0])
+    # else:
+    #     start_successors = problem.getSuccessors(start_state)
+    start_successors = problem.getSuccessors(start_state)
+    # print "Start's successors:", start_successors
+
+    # if type(start_state) not callable:
+    #     start_successors = problem.getSuccessors(start_state)
+    # elif type(start_state) == tuple:
+    #     start_successors = problem.getSuccessors(start_state[0])
+    # else:
+    #     raise TypeError("type(start_state) = ", type(start_state))
+    # print "Start:", start_state
+    # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    # print "Start's successors:", start_successors
+
+    fringe = util.Queue()
+    pushed = set([])
+    for position, action, dummy_cost in start_successors:
+        # print "start push", moving ,"or \n", (moving[0], [moving[1]], moving[2])
+        # fringe.push( (moving[0], [moving[1]], moving[2]) )
+        # pushed.add(moving[0])
+        # print "position", position
+        fringe.push( (position, [action]) )
+        pushed.add(position)
+
+    closed = [start_state]
+
+    while not fringe.isEmpty():
+        position, actions = fringe.pop()
+        # if problem.isGoalState(moving[0]):
+        #     # print "RETURN ", moving[1]
+        #     return moving[1]
+        if problem.isGoalState(position):
+            # print "RETURN ", moving[1]
+            # print "RETURN ", actions
+            return actions
+        # print "moving: ", moving#, "go to", moving[0]
+
+
+        # closed.append(moving[0])
+        closed.append(position)
+        # print "closed: %s" % closed
+        # successors = problem.getSuccessors(moving[0])
+        successors = problem.getSuccessors(position)
+        # print "successors", successors
+        for child_position, child_action, dummy_cost in successors:
+            # print "child[0]", child[0]
+            if (child_position not in closed) and (child_position not in pushed):
+                # print "push %s" % str(child)
+                #  moving[1] is a sequence of previously actions made, add new action child[1] to this list
+                # print "ahaa", moving[1],  [child[1]]
+                fringe.push( (child_position, actions + [child_action]))
+                # fringe.push( (child[0], moving[1]+ [child[1]], child[2]) )
+                # pushed.add(child[0])
+                pushed.add(child_position)
+    else:
+        print "Failure!"
+        return []
+    # insert these as arguments for pacman.py for tests (run - edit configuration using PyCharm)
+    # -l mediumMaze -p SearchAgent -a fn=bfs
+    # -l bigMaze -p SearchAgent -a fn=bfs -z .5
+    # autograder.py arguments: -q q2
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state =  problem.getStartState()
+    start_successors = problem.getSuccessors(start_state)
+    successors = {start_state : start_successors}
+    # print "Start:", start_state
+    # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    # print "Start's successors:", start_successors
+
+    fringe = util.PriorityQueue()
+    pushed = set([])
+    best_cost = {}
+    for moving in start_successors:
+        # print "push", ( (moving[0], [moving[1]], moving[2]) , moving[2])
+        # print "push", ( moving[0], [moving[1]], moving[2])
+        fringe.push( (moving[0], [moving[1]], moving[2]) , moving[2])
+        best_cost[moving[0]] = moving[2]
+        # pushed.add(moving[0])
+        pushed.add(moving)
+    # closed = [(start_state, "", 0)]
+    closed = [start_state]
+
+    while not fringe.isEmpty():
+        moving = fringe.pop()
+        if problem.isGoalState(moving[0]):
+            # print "RETURN ", moving[1]
+            return moving[1]
+        # print "moving to %s %s" % (moving[0],  moving)#, "go to", moving[0]
+        closed.append(moving[0])
+        # print "closed: %s" % closed
+        if moving[0] not in successors.keys(): # the main change is to define a dict
+            successors[moving[0]] = problem.getSuccessors(moving[0])
+        # else:
+        #     delta =  best_cost[moving[0]] - moving[2]
+        #     if delta:
+        #         # update cost of current moving
+        #         best_cost[moving[0]] = moving[2]
+        #         # update costs of future movings
+        #         new_sucs = []
+        #         print "HERE uccessors[moving[0]", successors[moving[0]]
+        #         for successor in successors[moving[0]]:
+        #             print "successor", successor
+        #             print "successor[1]", successor[1]
+        #             new_sucs.append( (successor[0],
+        #                               moving[1] + successor[1][-1], # update move vs current plus move to suc
+        #                               successor[2] - delta ))
+        #         successors[moving[0]] = new_sucs
+        # print "moving: %s closed: %s sorted successors: %s" % (moving, closed , successors)
+        for child in successors[moving[0]]:
+            # print "child[0]", child[0]
+            if (child[0] not in closed) and (child not in pushed):
+                best_cost[child[0]] = moving[2] + child[2]
+                # print "push", (child[0], moving[1] + [child[1]], moving[2] + child[2]), moving[2] + child[2]
+                fringe.push( (child[0], moving[1] + [child[1]], moving[2] + child[2]), moving[2] + child[2] )
+                pushed.add(child)
+    else:
+        print "Failure!"
+        return []
+    # insert these as arguments for pacman.py for tests (run - edit configuration using PyCharm)
+
+    # autograder.py arguments: -q q3
 
 def nullHeuristic(state, problem=None):
     """
@@ -174,7 +281,86 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    start_state =  problem.getStartState()
+    start_successors = problem.getSuccessors(start_state)
+    successors = {start_state : start_successors}
+
+    # succ_heur = []
+    # for successor in start_successors:
+    #     # succ_heur.append(successor[2] + heuristic(successor, problem) )
+    #     print "successor[2]", successor[2]
+
+
+
+    # Hn = heuristic(start_state, problem)
+
+
+    # successors = {start_state : (start_successors[0], start_successors[1], start_successors[2] + heuristic(start_state, problem) )  }
+
+
+    # print "Start:", start_state
+    # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    # print "Start's successors:", start_successors
+    # print "heuristic func = ", heuristic
+    # print "heuristic start_state", heuristic(start_state, problem)
+    # print "succ_Fn", succ_Fn
+
+    # print "successors dict",  successors[start_state]
+
+
+    # succ_Fn = [(successor[2] + heuristic(successor[0], problem)) for successor in start_successors]
+    # for successor in start_successors:
+    #
+    # successors = {start_state : (start_successors[0], start_successors[1], start_successors[2] + heuristic(start_state, problem) )  }
+    #
+    # return []
+
+    fringe = util.PriorityQueue()
+    pushed = set([])
+    best_cost = {}
+    for moving in start_successors:
+        # print "push", ( (moving[0], [moving[1]], moving[2]) , moving[2])
+        # print "push", ( moving[0], [moving[1]], moving[2])
+
+         # A*
+        succ_Fn =  moving[2] + heuristic(moving[0], problem) #
+        # print "push moving", moving, "with succ_Fn =", succ_Fn
+        fringe.push( (moving[0], [moving[1]], moving[2]) , succ_Fn) #
+        best_cost[moving[0]] = succ_Fn #
+        # pushed.add(moving[0])
+        pushed.add(moving)
+    # closed = [(start_state, "", 0)]
+    closed = [start_state]
+
+    # print "loop"
+    while not fringe.isEmpty():
+        moving = fringe.pop()
+        if problem.isGoalState(moving[0]):
+            # print "RETURN ", moving[1]
+            return moving[1]
+        # print "moving to %s %s" % (moving[0],  moving)#, "go to", moving[0]
+        closed.append(moving[0])
+        # print "closed: %s" % closed
+        if moving[0] not in successors.keys():
+            successors[moving[0]] = problem.getSuccessors(moving[0])
+        for child in successors[moving[0]]:
+            succ_Fn =  moving[2] + child[2] + heuristic(child[0], problem) #
+            # succ_Fn =  moving[2]  + heuristic(child[0], problem) #
+            # print "child", child,  "with succ_Fn =", succ_Fn
+            if (child[0] not in closed) and (child not in pushed):
+                # best_cost[child[0]] = moving[2] + child[2]
+                best_cost[child[0]] = succ_Fn #
+                # print "push", (child[0], moving[1] + [child[1]], moving[2] + child[2]), moving[2] + child[2]
+                fringe.push( (child[0], moving[1] + [child[1]], moving[2] + child[2]), succ_Fn )
+                pushed.add(child)
+    else:
+        print "Failure!"
+        return []
+
+    # insert these as arguments for pacman.py for tests (run - edit configuration using PyCharm)
+    # -l bigMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic
+    # autograder.py arguments: -q q4
 
 
 # Abbreviations
