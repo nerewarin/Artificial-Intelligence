@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/AI WEEK3 - SEARCH IN PACMAN.iml" filepath="$PROJECT_DIR$/.idea/AI WEEK3 - SEARCH IN PACMAN.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../WEEK6 - MULTI-AGENT SEARCH/.idea/WEEK6 - MULTI-AGENT SEARCH.iml" filepath="$PROJECT_DIR$/../WEEK6 - MULTI-AGENT SEARCH/.idea/WEEK6 - MULTI-AGENT SEARCH.iml" />
     </modules>
   </component>
 </project>

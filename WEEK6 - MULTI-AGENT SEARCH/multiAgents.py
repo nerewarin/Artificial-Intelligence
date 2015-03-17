@@ -168,11 +168,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        # print "func_name evaluationFunction", self.evaluationFunction.func_name
+        # print "gameState.getNumAgents()", gameState.getNumAgents()
+
         # pacActions =  gameState.getLegalActions(0)
         # ghost1Actions = gameState.getLegalActions(1)
         # ghost2Actions = gameState.getLegalActions(2)
         # print "self.evaluationFunction", self.evaluationFunction
-        print "func_name evaluationFunction", self.evaluationFunction.func_name
         # print "dir self.evaluationFunction", dir(self.evaluationFunction)
         # ['__call__', '__class__', '__closure__', '__code__', '__defaults__', '__delattr__', '__dict__',
         #  '__doc__', '__format__', '__get__', '__getattribute__', '__globals__', '__hash__', '__init__',
@@ -181,32 +183,90 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # 'func_closure', 'func_code', 'func_defaults', 'func_dict', 'func_doc', 'func_globals', 'func_name']
 
         # print "pacActions = %s ,ghost1Actions = %s , ghost2Actions = %s " % (pacActions, ghost1Actions, ghost2Actions)
-        print "gameState.getNumAgents()", gameState.getNumAgents()
         # print "self.evaluationFunction(gameState)", self.evaluationFunction(gameState)
-        state = gameState
+        # state = gameState
+        # ancestors = [("root", 0, gameState)] #      0 = pacman
+        # tree = {ancestor : {"" : state} }
+
         # fringe = util.Queue()
         # fringe.push(
         # closed = [start_state]
+
+        # initialization
+        tree = {}
+        ancestor_states = [gameState]
+        acts_states = [("nth0", "nth1")]
+        print dir(gameState) # = ['__doc__', '__eq__', '__hash__', '__init__', '__module__', '__str__',
+        # 'data', 'deepCopy', 'explored', 'generatePacmanSuccessor', 'generateSuccessor', 'getAndResetExplored',
+        # 'getCapsules', 'getFood', 'getGhostPosition', 'getGhostPositions', 'getGhostState', 'getGhostStates',
+        # 'getLegalActions', 'getLegalPacmanActions', 'getNumAgents', 'getNumFood', 'getPacmanPosition',
+        # 'getPacmanState', 'getScore', 'getWalls', 'hasFood', 'hasWall', 'initialize', 'isLose', 'isWin']
+
+        agents_states = []
+        # for agent_num in xrange(gameState.getNumAgents()):
+        # agents_states.append(gameState.getPacmanPosition)
+        # print "PacmanPosition", gameState.getPacmanPosition()
+        # print "GhostPositions", gameState.getGhostPositions()
+        # for agent_num in xrange(gameState.getNumAgents() - 1):
+        #     print gameState.getGhostPositions
+        # pacActions =  gameState.getLegalActions(0)
+        # ghost1Actions = gameState.getLegalActions(1)
+        # ghost2Actions = gameState.getLegalActions(2)
+        # ancestors = ["root"]
+        pacActions =  gameState.getLegalActions(0)
+        scores = {}
+        for action in pacActions:
+            scores[action] = 0
+        print scores
+        print "\nSTART"
         for ply in xrange(self.depth):
-
-
-            # actions = [state.getLegalActions(agent_num) for agent_num in xrange(state.getNumAgents())]
-            # print "actions", actions
-            #
-            # # compute minimax
-            # score = "-inf"
-            # # # pacman step
-            # for pacAction in actions[0]:
-            #     print "pacAction", pacAction
-            #     state = gameState.generateSuccessor(0, pacAction)
-
-            # universal cycle but..who min who max?...
             for agent_num in xrange(gameState.getNumAgents()):
-                for action in actions[agent_num]:
-                    new_state = state.generateSuccessor(agent_num, action)
+                print "ply, agent = ", ply, agent_num
+                # for action in ancestor_state.getLegalActions(agent_num):
+                # maybe check win here?
+                # tree[(ply, agent_num, ancestor_state)] = []
+                for pre_state in ancestor_states:
+                    sucStates = [pre_state.generateSuccessor(agent_num, action) for action in pre_state.getLegalActions(agent_num)]
+                    tree[(ply, agent_num, pre_state)] = sucStates
+                    # acts_states = [(action, pre_state.generateSuccessor(agent_num, action)) for action in pre_state.getLegalActions(agent_num)]
+                    ## key = (ply, agent_num, pre_state), value = (action, successor_state)
+                    # tree[(ply, agent_num, pre_state)] = acts_states
+                # ancestor_states = [state[1] for state in  acts_states]
+                ancestor_states = [state for state in sucStates]
 
-            # call evaluation function
-            # self.evaluationFunction(state)
+        # for key, value in tree.iteritems():
+        #     actions = []
+        #     for action, state in value:
+        #         actions.append(action)
+        #     print "ply %s agent %s : %s " % (key[0], key[1], actions)
+        print tree
+        # for ply in xrange(self.depth, 0, -1):
+        #     for agent_num in xrange(gameState.getNumAgents(), 0, -1):
+        #         print tree[(ply, agent_num, pre_state)]
+
+        # # build tree of actions-states
+        # for ply in xrange(self.depth):
+        #     # actions = [state.getLegalActions(agent_num) for agent_num in xrange(state.getNumAgents())]
+        #     # print "actions", actions
+        #     #
+        #     # # compute minimax
+        #     # score = "-inf"
+        #     # # # pacman step
+        #     # for pacAction in actions[0]:
+        #     #     print "pacAction", pacAction
+        #     #     state = gameState.generateSuccessor(0, pacAction)
+        #     # universal cycle but..who min who max?...
+        #     for agent_num in xrange(gameState.getNumAgents()):
+        #         # for _key_, _state_ in tree[ancestor].iteritems():
+        #         #     for action in _state_.getLegalActions(agent_num):
+        #         #         print "action", action
+        #         #         new_state = _state_.generateSuccessor(agent_num, action)
+        #         # for ancestor in ancestors:
+        #         #     for action in ancestor[2].getLegalActions(agent_num):
+        #         for action in
+        #
+        #     # call evaluation function
+        #     # self.evaluationFunction(state)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
