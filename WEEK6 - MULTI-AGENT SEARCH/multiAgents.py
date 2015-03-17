@@ -169,7 +169,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         # print "func_name evaluationFunction", self.evaluationFunction.func_name
-        # print "gameState.getNumAgents()", gameState.getNumAgents()
+        print "gameState.getNumAgents()", gameState.getNumAgents()
 
         # pacActions =  gameState.getLegalActions(0)
         # ghost1Actions = gameState.getLegalActions(1)
@@ -192,32 +192,77 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # fringe.push(
         # closed = [start_state]
 
-        # initialization
-        tree = {}
-        ancestor_states = [gameState]
-        acts_states = [("nth0", "nth1")]
-        print dir(gameState) # = ['__doc__', '__eq__', '__hash__', '__init__', '__module__', '__str__',
-        # 'data', 'deepCopy', 'explored', 'generatePacmanSuccessor', 'generateSuccessor', 'getAndResetExplored',
-        # 'getCapsules', 'getFood', 'getGhostPosition', 'getGhostPositions', 'getGhostState', 'getGhostStates',
-        # 'getLegalActions', 'getLegalPacmanActions', 'getNumAgents', 'getNumFood', 'getPacmanPosition',
-        # 'getPacmanState', 'getScore', 'getWalls', 'hasFood', 'hasWall', 'initialize', 'isLose', 'isWin']
+        # # initialization
+        # tree = {}
+        # ancestor_states = [gameState]
+        # acts_states = [("nth0", "nth1")]
+        # print dir(gameState) # = ['__doc__', '__eq__', '__hash__', '__init__', '__module__', '__str__',
+        # # 'data', 'deepCopy', 'explored', 'generatePacmanSuccessor', 'generateSuccessor', 'getAndResetExplored',
+        # # 'getCapsules', 'getFood', 'getGhostPosition', 'getGhostPositions', 'getGhostState', 'getGhostStates',
+        # # 'getLegalActions', 'getLegalPacmanActions', 'getNumAgents', 'getNumFood', 'getPacmanPosition',
+        # # 'getPacmanState', 'getScore', 'getWalls', 'hasFood', 'hasWall', 'initialize', 'isLose', 'isWin']
+        #
+        # agents_states = []
+        # # for agent_num in xrange(gameState.getNumAgents()):
+        # # agents_states.append(gameState.getPacmanPosition)
+        # # print "PacmanPosition", gameState.getPacmanPosition()
+        # # print "GhostPositions", gameState.getGhostPositions()
+        # # for agent_num in xrange(gameState.getNumAgents() - 1):
+        # #     print gameState.getGhostPositions
+        # # pacActions =  gameState.getLegalActions(0)
+        # # ghost1Actions = gameState.getLegalActions(1)
+        # # ghost2Actions = gameState.getLegalActions(2)
+        # # ancestors = ["root"]
+        def min_value(agent, state, remaining_depth):
+            # best_act, best_score  = None, self.evaluationFunction(gameState)
+            best_score = float("inf")
+            successors = [state.generateSuccessor(agent, action) for action in state.getLegalActions(agent)]
+            nextAgent = (agent + 1) % state.getNumAgents()
+            # print "min_value nextAgent", nextAgent, "sucs_num = ", len(successors)
+            for suc in successors:
+                best_score = min(best_score, mm_value(nextAgent, suc, remaining_depth))
+                # print "min_value local best_score", best_score
+            return best_score
 
-        agents_states = []
-        # for agent_num in xrange(gameState.getNumAgents()):
-        # agents_states.append(gameState.getPacmanPosition)
-        # print "PacmanPosition", gameState.getPacmanPosition()
-        # print "GhostPositions", gameState.getGhostPositions()
-        # for agent_num in xrange(gameState.getNumAgents() - 1):
-        #     print gameState.getGhostPositions
-        # pacActions =  gameState.getLegalActions(0)
-        # ghost1Actions = gameState.getLegalActions(1)
-        # ghost2Actions = gameState.getLegalActions(2)
-        # ancestors = ["root"]
+        def max_value(agent, state, remaining_depth):
+            # best_act, best_score  = None, self.evaluationFunction(gameState)
+            best_score = float("-inf")
+            successors = [state.generateSuccessor(agent, action) for action in state.getLegalActions(agent)]
+            nextAgent = (agent + 1) % state.getNumAgents()
+            # print "max_value nextAgent", nextAgent
+            for suc in successors:
+                best_score = max(best_score, mm_value(nextAgent, suc, remaining_depth))
+            return best_score
+
+        def mm_value(agent, state, remaining_depth):
+            # print "mm_value agent", agent, "remdepth", remaining_depth
+            if (state.isWin() or state.isLose() or not remaining_depth):
+                # print "win?", state.isWin(), "lose?", state.isLose(), "score =", self.evaluationFunction(state)
+                return self.evaluationFunction(state)
+            if agent:
+                return min_value(agent, state, remaining_depth)
+            # else Pacman
+            return max_value(agent, state, remaining_depth-1)
+
         pacActions =  gameState.getLegalActions(0)
         scores = {}
         for action in pacActions:
-            scores[action] = 0
+            scores[action] = mm_value(1, gameState.generateSuccessor(0, action), self.depth)
         print scores
+        # find max score
+        # best_act, best_score  = None, self.evaluationFunction(gameState)
+        # print "(0 > -inf?)", 0.0 > float("-inf")
+        best_act, best_score  = None, float("-inf")
+        for act, value in scores.iteritems():
+            # print "act, value, best_score", act, value, best_score
+            if value > best_score:
+                # print "new best_score"
+                best_act = act
+                best_score = value
+        print "best_act", best_act, "best_score", best_score
+        return best_act
+
+
         print "\nSTART"
         for ply in xrange(self.depth):
             for agent_num in xrange(gameState.getNumAgents()):
