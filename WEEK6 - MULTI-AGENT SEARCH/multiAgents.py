@@ -263,7 +263,82 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # print "\nSTART"
+        # print "gameState.getNumAgents()", gameState.getNumAgents()
+        # print "func_name evaluationFunction", self.evaluationFunction.func_name
+        def merge_values(agent, state, remaining_depth, mode, a, b):
+            """
+            mode = 0 => minimizer
+            mode = 1 => maximizer
+            """
+            # best_act, best_score  = None, self.evaluationFunction(gameState)
+
+            # successors = [state.generateSuccessor(agent, action) for action in state.getLegalActions(agent)]
+            nextAgent = (agent + 1) % state.getNumAgents()
+
+            rem_depth = remaining_depth
+            if not nextAgent: # (not ghost)
+                rem_depth -= 1 # decrement depth
+            # print "merge_values mode =", mode, "nextAgent =", nextAgent, "sucs_num = ", len(successors), "a =", a, "b =",b
+
+            if mode:
+                best_score = float("-inf")
+                for action in state.getLegalActions(agent):
+                    suc = state.generateSuccessor(agent, action)
+                # for suc in successors: # GREAT ERROR! DO NOT EXPAND SUCCESSORS, AFTER 1st ACTION THEY CAN BE PRUNED!
+                    new_score = mm_value(nextAgent, suc, rem_depth, a, b)
+                    # print "maximize", "action = ", action, "a =", a, "b =",b, "best_score =", best_score, "new_score", new_score
+                    best_score = max(best_score, new_score)
+                    if best_score > b: return best_score
+                    a = max(a, best_score)
+            else:
+                best_score = float("inf")
+                for action in state.getLegalActions(agent):
+                    suc = state.generateSuccessor(agent, action)
+                    new_score = mm_value(nextAgent, suc, rem_depth, a, b)
+                    # print "minimize", "action = ", action, "a =", a, "b =",b, "best_score =", best_score, "new_score", new_score
+                    best_score = min(best_score, new_score)
+                    if best_score < a: return best_score
+                    b = min(b, best_score)
+            # print "min_value local best_score", best_score
+            return best_score
+
+        def mm_value(agent, state, remaining_depth, a ,b):
+            # print "mm_value agent", agent, "remdepth", remaining_depth
+            if (state.isWin() or state.isLose() or not remaining_depth):
+                # print "win?", state.isWin(), "lose?", state.isLose(), "score =", self.evaluationFunction(state)
+                # print "mm_value returned", self.evaluationFunction(state)
+                return self.evaluationFunction(state)
+            mode = 1   # maximizer if pacman
+            if agent:  # minimizer if ghost
+                mode = 0
+            return merge_values(agent, state, remaining_depth, mode, a, b)
+
+
+        pacActions = gameState.getLegalActions(0)
+        scores = {}
+        # initially do not let pruning
+        a = float("-inf")
+        b = float("inf")
+        for action in pacActions:
+            score = mm_value(1, gameState.generateSuccessor(0, action), self.depth, a, b)
+            scores[action] = score
+            # print "returned score to root ", score, "a was =", a, "b was =",b
+            a = max(a, score)
+
+
+        # print scores
+        ## find max score
+        # best_act, best_score  = None, self.evaluationFunction(gameState)
+        best_act, best_score  = None, float("-inf")
+        for act, value in scores.iteritems():
+            # print "act, value, best_score", act, value, best_score
+            if value > best_score:
+                # print "new best_score"
+                best_act = act
+                best_score = value
+        # print "best_act", best_act, "best_score", best_score
+        return best_act
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
