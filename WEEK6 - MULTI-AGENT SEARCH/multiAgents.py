@@ -353,7 +353,61 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def merge_values(agent, state, remaining_depth, mode):
+            """
+            mode = 0 => minimizer
+            mode = 1 => maximizer
+            """
+            # best_act, best_score  = None, self.evaluationFunction(gameState)
+
+            successors = [state.generateSuccessor(agent, action) for action in state.getLegalActions(agent)]
+            nextAgent = (agent + 1) % state.getNumAgents()
+
+            rem_depth = remaining_depth
+            if not nextAgent: # (not ghost)
+                rem_depth -= 1 # decrement depth
+            # print "min_value nextAgent", nextAgent, "sucs_num = ", len(successors)
+
+            if mode:
+                best_score = float("-inf")
+                for suc in successors:
+                    best_score = max(best_score, mm_value(nextAgent, suc, rem_depth))
+            else:
+                best_score = float("inf")
+                score_sum = 0.0
+                leng = len(successors)
+                for suc in successors:
+                    score_sum +=  mm_value(nextAgent, suc, rem_depth)
+                best_score = float(score_sum)/leng
+            # print "min_value local best_score", best_score
+            return best_score
+        def mm_value(agent, state, remaining_depth):
+            # print "mm_value agent", agent, "remdepth", remaining_depth
+            if (state.isWin() or state.isLose() or not remaining_depth):
+                # print "win?", state.isWin(), "lose?", state.isLose(), "score =", self.evaluationFunction(state)
+                return self.evaluationFunction(state)
+            mode = 1   # maximizer if pacman
+            if agent:  # minimizer if ghost
+                mode = 0
+            return merge_values(agent, state, remaining_depth, mode)
+
+
+        pacActions = gameState.getLegalActions(0)
+        scores = {}
+        for action in pacActions:
+            scores[action] = mm_value(1, gameState.generateSuccessor(0, action), self.depth)
+        # print scores
+        ## find max score
+        # best_act, best_score  = None, self.evaluationFunction(gameState)
+        best_act, best_score  = None, float("-inf")
+        for act, value in scores.iteritems():
+            # print "act, value, best_score", act, value, best_score
+            if value > best_score:
+                # print "new best_score"
+                best_act = act
+                best_score = value
+        # print "best_act", best_act, "best_score", best_score
+        return best_act
 
 def betterEvaluationFunction(currentGameState):
     """
