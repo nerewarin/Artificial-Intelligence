@@ -369,7 +369,14 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION:
+      currentGameState.getScore() I subtract:
+      - ghostPenalty ( = 0 if closest ghost is not closer than 1 step,
+                     = 1000 if its close (dangerous position!,
+                     - -1000 if it is close and scared (catch him now!);
+       - 0.01*foodDist (distance to closest food so ceteris paribus we prefer way to food )
+       and
+       - 0.01*PelletDist (the same logic as food)
     """
     "*** YOUR CODE HERE ***"
     # Useful information you can extract from a GameState (pacman.py)
