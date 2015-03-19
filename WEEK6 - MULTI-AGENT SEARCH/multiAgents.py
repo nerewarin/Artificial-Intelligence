@@ -417,7 +417,64 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # def evaluationFunction(self, currentGameState, action):
+    # Useful information you can extract from a GameState (pacman.py)
+    # print dir(currentGameState) # ['__doc__', '__eq__', '__hash__', '__init__', '__module__', '__str__',
+    #  'data', 'deepCopy', 'explored', 'generatePacmanSuccessor', 'generateSuccessor', 'getAndResetExplored',
+    #  'getCapsules', 'getFood', 'getGhostPosition', 'getGhostPositions', 'getGhostState', 'getGhostStates',
+    # 'getLegalActions', 'getLegalPacmanAct
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    pellets = currentGameState.getCapsules()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    # print "newScaredTimes", newScaredTimes
+
+    # compute dist to closest ghost
+    ghostDist = "inf"
+    closestGhost = "undefined"
+    for i, ghostState in enumerate(newGhostStates):
+        # print type(ghostState), dir(ghostState)
+        # <type 'instance'>
+        # ['__doc__', '__eq__', '__hash__', '__init__', '__module__', '__str__', 'configuration',
+        # 'copy', 'getDirection', 'getPosition', 'isPacman', 'numCarrying', 'numReturned', 'scaredTimer', 'start']
+        ghostDist =  min(ghostDist, manhattanDistance(newPos, ghostState.getPosition()))
+        closestGhost = i
+        # closestGhost = ghostState
+
+    ghostPenalty = 0
+    if newGhostStates: # ghost exists
+        if ghostDist < 2: # if it's close to us (else ignore it)
+            # print "newGhostStates", newGhostStates
+            # print "ghostState", closestGhost
+            # print "closestGhost.scaredTimer", newScaredTimes[closestGhost]
+            if newScaredTimes[closestGhost]: # if closest ghost scared, its very good position!
+                ghostPenalty= -1000
+            else: # its very bad, don't go there!
+                ghostPenalty = 1000
+
+
+    # compute dist to closest food
+    foodDist = 1000
+    for food in newFood.asList():
+        # print type(newFood), dir(newFood)
+        #<type 'instance'>
+        # ['CELLS_PER_INT', '__doc__', '__eq__', '__getitem__', '__hash__', '__init__', '__module__',
+        # '__setitem__', '__str__', '_cellIndexToPosition', '_unpackBits', '_unpackInt',
+        # 'asList', 'copy', 'count', 'data', 'deepCopy', 'height', 'packBits', 'shallowCopy', 'width']
+        # print "food", food
+        foodDist = min(foodDist, manhattanDistance(newPos, food))
+
+    # compute dist to closest pellet
+    PelletDist = 1000
+    # print "pellets", pellets
+    for pelletPos in pellets:
+        PelletDist = min(PelletDist, manhattanDistance(newPos, pelletPos))
+    if PelletDist < 2:
+        PelletDist *= -100
+    # myScore of -q q5 --no graphics = 1115.1
+    return currentGameState.getScore() - ghostPenalty - 0.01*foodDist - 0.01*PelletDist # = 1115.1
+    # return currentGameState.getScore() - ghostPenalty - 0.02*foodDist - 0.01*PelletDist
 
 # Abbreviation
 better = betterEvaluationFunction
