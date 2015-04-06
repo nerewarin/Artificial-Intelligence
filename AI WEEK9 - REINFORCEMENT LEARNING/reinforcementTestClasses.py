@@ -137,7 +137,7 @@ class ValueIterationTest(testClasses.TestCase):
                 if action in possibleActions:
                     qValues[action][state] = agent.computeQValueFromValues(state, action)
                 else:
-                    qValues[action][state] = None
+                        qValues[action][state] = None
         valuesPretty = self.prettyValues(values)
         policyPretty = self.prettyPolicy(policy)
         qValuesPretty = {}
