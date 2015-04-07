@@ -99,22 +99,7 @@ class QLearningAgent(ReinforcementAgent):
         for action in legalActions:
             temp_QValues[(state,action)] = self.getQValue(state, action)
         best_action = temp_QValues.argMax()[1]
-
         return self.getQValue(state, best_action)
-        # possible_actions = self.mdp.getPossibleActions(state)
-        # qValues = [self.computeQValueFromValues(state, action) for action in possible_actions]
-        # temp_counter[state] = max(qValues)
-        #
-        #         # Q =  sum of T * (R + gamma * V(nextState) )
-        #
-        # q = 0
-        # possible_states = self.mdp.getTransitionStatesAndProbs(state, action)
-        # for posState in possible_states:
-        #     T = posState[1]
-        #     nextState = posState[0]
-        #     reward = self.mdp.getReward(state, action, nextState) # maybe not posState! maybe posState[0]
-        #     q += T * (reward + self.discount * self.getValue(nextState))
-        # return q
 
     def computeActionFromQValues(self, state):
         """
@@ -126,13 +111,6 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         if not legalActions:
             return None
-        # if self.epsilon > random.randrange(100)*0.01:
-        #     # explore
-        #     # choose random action
-        #     return random.choice(legalActions)
-        # else:
-        # exploit
-        # choose optimal action
         temp_QValues = util.Counter()
         for action in legalActions:
             temp_QValues[(state,action)] = self.getQValue(state, action)
@@ -152,11 +130,22 @@ class QLearningAgent(ReinforcementAgent):
         """
         # Pick Action
         legalActions = self.getLegalActions(state)
-        action = None
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if not legalActions:
+            return None
+        if self.epsilon > random.randrange(100)*0.01:
+            # explore
+            # choose random action
+            return random.choice(legalActions)
+        # else:
+        # exploit
+        # choose optimal action
+        temp_QValues = util.Counter()
+        for action in legalActions:
+            temp_QValues[(state,action)] = self.getQValue(state, action)
+        best_action = temp_QValues.argMax()[1]
+        return best_action
 
-        return action
 
     def update(self, state, action, nextState, reward):
         """

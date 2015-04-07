@@ -66,7 +66,6 @@ class ValueIterationAgent(ValueEstimationAgent):
             # synchronize values
             self.values = temp_counter.copy()
 
-
     def getValue(self, state):
         """
           Return the value of the state (computed in __init__).
