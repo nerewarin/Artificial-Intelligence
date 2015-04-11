@@ -41,25 +41,12 @@ class QLearningAgent(ReinforcementAgent):
     """
     def __init__(self, **args):
         "You can initialize Q-values here..."
-        # ReinforcementAgent.__init__(self, **args)
-
+        ReinforcementAgent.__init__(self, **args)
 
         "*** YOUR CODE HERE ***"
-        # v1
-        ReinforcementAgent.__init__(self, **args)
         self.epsilon = args["epsilon"]
         self.alpha = args["alpha"]
         self.discount = args["gamma"]
-
-        # v2
-        # Agent = ReinforcementAgent(**args)
-        # self.epsilon = Agent.epsilon
-        # self.alpha = Agent.alpha
-        # self.discount = Agent.discount
-        # print "QLearningAgent __init__", self.epsilon, self.alpha, self.discount
-        # gridworld.py -a q -k 5 -m
-        # QLearningAgent __init__ 0.3 0.5 0.9
-
         self.QValues = util.Counter() # A Counter is a dict with default 0
 
     def getQValue(self, state, action):
@@ -83,18 +70,6 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         if not legalActions:
             return 0.0
-
-        # v1
-        # best_action = None
-        # best_value = float(-"inf")
-        # for action in legalActions:
-        #     value = self.getQValue[ (state, action) ]
-        #     if value > best_value:
-        #         best_action = action
-        #         best_value = value
-        # return best_value
-
-        # v2
         temp_QValues = util.Counter()
         for action in legalActions:
             temp_QValues[(state,action)] = self.getQValue(state, action)
@@ -157,9 +132,6 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        # bookmark (DELETE IT)
-        if state in [(3,2) , (3,1)]: # catch terminal states
-            bookmark = True
         oldQV = self.getQValue(state, action)
         newQV = self.computeValueFromQValues(nextState)
         self.QValues[state, action] = (1 - self.alpha) * oldQV + self.alpha * (reward + self.discount * newQV)
