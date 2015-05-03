@@ -198,7 +198,7 @@ class ApproximateQAgent(PacmanQAgent):
         """
         "*** YOUR CODE HERE ***"
         features = self.featExtractor.getFeatures(state, action)
-        return sum([Fvalue * self.getWeights()[Fkey]  for Fkey, Fvalue in features.iteritems()])
+        return sum([Fvalue * self.getWeights()[Fkey] for Fkey, Fvalue in features.iteritems()])
 
 
     def update(self, state, action, nextState, reward):
