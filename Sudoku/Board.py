@@ -89,6 +89,9 @@ class SudokuBoard():
         """
         self.board = copy.deepcopy(self.initialBoard)
 
+    def copy(self):
+        return copy.deepcopy(self)
+
     def checkRow(self, row):
         """
         check conflicts in a given row
@@ -138,13 +141,15 @@ class SudokuBoard():
         """
         quadrant = {}
         duplicated = {}
-        quadDim = self.getBoardDim()//3 # cells in a single row or column of quadrant (= 3)
+        quadDim = self.getQuadDim() # cells in a single row or column of quadrant (= 3)
+        # start_cell = ( (index % 3) * quadDim, (index // quadDim )* quadDim)
+        start_cell = ( (index // quadDim) * quadDim, (index % quadDim )* quadDim)
         for qRow in range(quadDim):
             for qCol in range(quadDim):
                 # qRow -- row relative to 3x3 quadrant
                 # bRow -- row relative to 9x9 board
-                bRow = qRow + (index % 3) * quadDim
-                bCol = qCol + (index // quadDim) * quadDim
+                bRow = qRow + (index // quadDim) * quadDim
+                bCol = qCol + (index % quadDim) * quadDim
                 cell = (bRow, bCol)
                 value = self.getValue(cell)
                 if quadrant.has_key(value) and value != self.getUndefinedSymbol() :
@@ -161,7 +166,8 @@ class SudokuBoard():
         """
         check row, col and quadrant for 1 cell or for every cell
         :param cell:
-        :return:
+        :return: tuple of results (checkRow, checkColumn, checkQuadrant), where each result has form
+        {conflicted row/col/quad : {number : set(cell1, cell2..) } }
         """
         rowConflicts = {}
         colConflicts = {}
@@ -244,9 +250,15 @@ def SudokuBoardTest():
     # print "bad checkQuadrant", badcheckQuadrant
     assert badcheckQuadrant == {7: [(1, 1), (2, 1)]}, "checkQuadrant failed for bad testboard"
     TestBoard.reset()
-    print "test checkQuadrant passed"
+
+    # TestBoard.setValue((0,3), 9)
+    # print TestBoard.checkQuadrant(1)
+    # print "test checkQuadrant passed"
+
+
 
     # test all
+    TestBoard.reset()
     # print TestBoard.checkAll((0,1))
     assert TestBoard.checkAll((0,1)) == ({}, {}, {}), "checkall failed for good testboard in cell mode"
     assert TestBoard.checkAll() == ({}, {}, {}), "checkall failed for good testboard in all mode"
