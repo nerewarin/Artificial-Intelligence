@@ -15,7 +15,7 @@ class SudokuBoard():
         :return:
         """
         self.dimension = 9
-        self.quadDim = math.sqrt(self.dimension)
+        self.quadDim = int(math.sqrt(self.dimension))
         self.empty = undefinedSymbol
         self.board = []
         for row in range(self.dimension):
@@ -157,6 +157,47 @@ class SudokuBoard():
         # print "quadrant:\n", quadrant
         return duplicated
 
+    def checkAll(self, cell = "all"):
+        """
+        check row, col and quadrant for 1 cell or for every cell
+        :param cell:
+        :return:
+        """
+        rowConflicts = {}
+        colConflicts = {}
+        quadConflicts = {}
+
+        if cell == "all":
+            rRange = range(self.getBoardDim())
+            cRange = range(self.getBoardDim())
+            qRange = range(self.getBoardDim())
+        else:
+            # only one cell, so 1 row, 1 col and 1 quadrant
+            rRange = range(cell[0], cell[0] + 1)
+            cRange = range(cell[1], cell[1] + 1)
+            quad = self.getQuadrant(cell)
+            qRange = range(quad, quad + 1)
+
+        # if cell == "all":
+        for row in rRange:
+            rCheck = self.checkRow(row)
+            if rCheck:
+                # print "row conflict", rCheck
+                rowConflicts[row] = rCheck
+        # for col in range(self.getBoardDim()):
+        for col in cRange:
+            cCheck = self.checkColumn(col)
+            if cCheck:
+                # print "column conflict", cCheck
+                colConflicts[col] = cCheck
+        for quad in qRange:
+            # print "check quad", quad
+            qCheck = self.checkQuadrant(quad)
+            if qCheck:
+                # print "quadrant conflict", qCheck
+                quadConflicts[quad] = qCheck
+        return rowConflicts, colConflicts, quadConflicts
+
 ## TEST SECTION
 def SudokuBoardTest():
     definedNubmers = {(0,0):8,
@@ -202,9 +243,21 @@ def SudokuBoardTest():
     badcheckQuadrant = TestBoard.checkQuadrant(0)
     # print "bad checkQuadrant", badcheckQuadrant
     assert badcheckQuadrant == {7: [(1, 1), (2, 1)]}, "checkQuadrant failed for bad testboard"
+    TestBoard.reset()
     print "test checkQuadrant passed"
 
+    # test all
+    # print TestBoard.checkAll((0,1))
+    assert TestBoard.checkAll((0,1)) == ({}, {}, {}), "checkall failed for good testboard in cell mode"
+    assert TestBoard.checkAll() == ({}, {}, {}), "checkall failed for good testboard in all mode"
+    # make conflict
+    TestBoard.setValue((8,8), 4)
+    assert TestBoard.checkAll() == ({8: {4: set([(8, 6), (8, 8)])}}, {}, {8: {4: [(8, 6), (8, 8)]}}), \
+        "checkall passed for bad testboard in all mode"
+    assert TestBoard.checkAll((8, 2)) == ({8: {4: set([(8, 6), (8, 8)])}}, {}, {}), \
+        "checkall passed for bad testboard in cell mode"
+    print "test checkAll passed"
 
 
 ## run test
-# SudokuBoardTest()
+SudokuBoardTest()
