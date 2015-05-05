@@ -204,6 +204,16 @@ class SudokuBoard():
                 quadConflicts[quad] = qCheck
         return rowConflicts, colConflicts, quadConflicts
 
+    def isGoal(self):
+        """
+
+        :param board:
+        :return:
+        """
+        if self.getUndefinedSymbol() in self.board:
+            return True
+        return False
+
 ## TEST SECTION
 def SudokuBoardTest():
     definedNubmers = {(0,0):8,
@@ -255,9 +265,7 @@ def SudokuBoardTest():
     # print TestBoard.checkQuadrant(1)
     # print "test checkQuadrant passed"
 
-
-
-    # test all
+    # test checkAll
     TestBoard.reset()
     # print TestBoard.checkAll((0,1))
     assert TestBoard.checkAll((0,1)) == ({}, {}, {}), "checkall failed for good testboard in cell mode"
@@ -270,6 +278,10 @@ def SudokuBoardTest():
         "checkall passed for bad testboard in cell mode"
     print "test checkAll passed"
 
+    # test isGoal
+    TestBoard.reset()
+    assert not TestBoard.isGoal(), "goalCheck failed for uncomplited board"
+    print "test isGoal"
 
 ## run test
 SudokuBoardTest()
