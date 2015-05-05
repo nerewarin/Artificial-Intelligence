@@ -16,7 +16,7 @@ class CSP():
         for value in variants:
             brd = board.copy()
             brd.setValue(cell, value)
-            print "cell", cell, "var", value, brd.checkAll(cell)
+            # print "cell", cell, "var", value, brd.checkAll(cell)
             problems = False
             for problem in  brd.checkAll(cell):
             # if  brd.checkAll(cell) != ({}, {}, {}):
@@ -37,11 +37,11 @@ def CSPtest():
                       (8,1):9, (8,6):4      }
     TestBoard    =    Board.SudokuBoard(definedNubmers)
     TestCSP = CSP()
-    print TestCSP.valuesVariants(TestBoard, (0,3))
-    # TestCSP.valuesVariants(TestBoard, (0,1))
-    # for row in range(TestBoard.getBoardDim()):
-    #     for col in range(TestBoard.getBoardDim()):
-    #         print (row, col), TestCSP.valuesVariants(TestBoard, (row, col))
+    # print TestCSP.valuesVariants(TestBoard, (0,3))
+    TestCSP.valuesVariants(TestBoard, (0,1))
+    for row in range(TestBoard.getBoardDim()):
+        for col in range(TestBoard.getBoardDim()):
+            print (row, col), TestCSP.valuesVariants(TestBoard, (row, col))
 
 # run test
 CSPtest()
