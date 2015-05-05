@@ -65,15 +65,15 @@ class CSP():
     def BacktrackingSearch(self, board):
         if board.isGoal():
             return board
-        else:
+        # else:
             # TODO
 
 def CSPtest():
     # test valuesVariants
     TestBoard    =    Board.SudokuBoard(TestGlobals.definedNubmers_HB())
     TestCSP = CSP()
-    assert TestCSP.valuesVariants(TestBoard, (0,3)) == [0, 2, 3, 4, 7], "valuesVariants failed for HB (0,3)"
-    assert TestCSP.valuesVariants(TestBoard, (0,1)) == [0, 1, 2, 4, 6], "valuesVariants failed for HB (0,1)"
+    assert TestCSP.valuesVariants(TestBoard, (0,3)) == [2, 3, 4, 7], "valuesVariants failed for HB (0,3)"
+    assert TestCSP.valuesVariants(TestBoard, (0,1)) == [1, 2, 4, 6], "valuesVariants failed for HB (0,1)"
     # boardDim = TestBoard.getBoardDim()
     # for row in range(boardDim):
     #     for col in range(boardDim):
