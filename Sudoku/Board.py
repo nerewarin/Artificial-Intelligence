@@ -66,6 +66,7 @@ class SudokuBoard():
         y = cell[1] // 3
         return int(x  * self.getQuadDim() + y)
 
+
     def getValue(self, cell):
         """
         :param cell: tuple (row, column)
@@ -147,8 +148,7 @@ class SudokuBoard():
         quadrant = {}
         duplicated = {}
         quadDim = self.getQuadDim() # cells in a single row or column of quadrant (= 3)
-        # start_cell = ( (index % 3) * quadDim, (index // quadDim )* quadDim)
-        start_cell = ( (index // quadDim) * quadDim, (index % quadDim )* quadDim)
+        # start_cell = ( (index // quadDim) * quadDim, (index % quadDim )* quadDim)
         for qRow in range(quadDim):
             for qCol in range(quadDim):
                 # qRow -- row relative to 3x3 quadrant
@@ -270,12 +270,12 @@ class SudokuBoard():
 
     def cellToIndex(self, (row, col)):
         """
-        comvert tuple (row, col) to index
+        convert tuple (row, col) to index
         :return:
         """
         return row * self.getBoardDim()+ col
 
-    def MRV(self, board):
+    def MRV(self):
         """
         Minimum Remaining Values
 
@@ -285,9 +285,9 @@ class SudokuBoard():
         """
 
         # values in every cell -- self.allValuesVariants()
-        bDim = board.getBoardDim()
+        bDim = self.getBoardDim()
         cell = (None, None)
-        minValue = board.getBoardDim()
+        minValue = self.getBoardDim()
         values = self.getNumbers() # [1, 2, .. , 9]
         for ind, allValues in enumerate(self.allValuesVariants()):
             # print ind, variants, len(variants)
@@ -299,7 +299,76 @@ class SudokuBoard():
                 # print cell, ind, allValues
         return cell, values
 
+    def updateVariants(self, cell, value):
+        """
+        exclude value after assignment to cell from variants in its row, col and quadrant
+        :param cell:  where assignment was
+        :param value: what was assigned
+        :return: nth but update self.
+        """
+        row, col = cell
+        bDim = range(self.getBoardDim())
+        # quadrant = self.getQuadrant(cell)
+        # quadDim = self.getQuadDim() # number of cells in a single row or column of quadrant (= 3)
 
+        # update assigned cell
+        self.ValuesVariants[self.cellToIndex(cell)] = [value]
+        # print "update assigned cell variants", self.ValuesVariants[self.cellToIndex(cell)]
+
+        # print "before update", self.ValuesVariants
+        # print "cell %s, row %s, col %s, quadrant %s" % (cell, row, col, quadrant)
+        # update row
+        for _col_ in bDim:
+            if _col_ != col:
+                # print "row, col, index",  row, _col_, self.cellToIndex((row, _col_))
+                variants = self.ValuesVariants[self.cellToIndex((row, _col_))]
+                # print variants
+                if value in variants:
+                    # print "before update in", (row, _col_), self.ValuesVariants[self.cellToIndex((row, _col_))]
+                    variants.remove(value)
+                    # print "after update", self.ValuesVariants[self.cellToIndex((row, _col_))]
+
+        # update column
+        for _row_ in bDim:
+            if _row_ != row:
+                variants = self.ValuesVariants[self.cellToIndex((_row_, col))]
+                if value in variants:
+                    variants.remove(value)
+
+        # update quadrant
+        # we just update four cells, which are not in a same row (cause it had been already updated)
+        # and not in the same column
+        neighbors = self.getQuadrantNeighbors(cell)
+        for neighbor in neighbors:
+            variants = self.ValuesVariants[self.cellToIndex(neighbor)]
+            if value in variants:
+                variants.remove(value)
+
+    def getQuadrantNeighbors(self, cell):
+        """
+
+        :param cell:    from what cell we search neighbors
+        :return:    cells that are neighbors only by quadrant (not in the same row or column)
+        """
+        row, col = cell
+        quadrant = self.getQuadrant(cell)
+        quadDim = self.getQuadDim() # number of cells in a single row or column of quadrant (= 3)
+        # print "cell, quadrant", cell, quadrant
+        neighbors = []
+
+        neigbors_quantity = (quadDim - 1) * (quadDim - 1) # just for check
+        # print "neigbors_quantity", neigbors_quantity
+
+        # for quadrant
+        start_row = (row // quadDim) * quadDim
+        start_col = (col // quadDim) * quadDim
+        for _row_ in range(start_row, start_row + quadDim):
+            if _row_ != row:
+                for _col_ in range(start_col, start_col + quadDim):
+                    if _col_ != col:
+                        neighbors.append((_row_, _col_))
+        assert len(neighbors) == neigbors_quantity, "incorrect neigbors_quantity"
+        return neighbors
 
 ## TEST SECTION
 def SudokuBoardTest():
@@ -374,17 +443,9 @@ def SudokuBoardTest():
     print "passed test isFull"
 
     # test valuesVariants
-    # TestCSP = CSP()
     assert TestBoard.valuesVariants((0,3)) == [2, 3, 4, 7], "valuesVariants failed for HB (0,3)"
     assert TestBoard.valuesVariants((0,1)) == [1, 2, 4, 6], "valuesVariants failed for HB (0,1)"
-    # boardDim = TestBoard.getBoardDim()
-    # for row in range(boardDim):
-    #     for col in range(boardDim):
-    #         print (row, col), TestCSP.valuesVariants(TestBoard, (row, col))#, TestGlobals.valuesVariants_answerHB()[row*boardDim + col]
-            # print str(TestCSP.valuesVariants(TestBoard, (row, col))) + ","
-
-    #         assert TestCSP.valuesVariants(TestBoard, (row, col)) == \
-    #                TestGlobals.valuesVariants_answerHB()[row * boardDim+ col], "valuesVariants failed for HB"
+    assert TestBoard.valuesVariants((0,7)) == [4, 5, 7, 9], "valuesVariants failed for HB (0,7)"
     print "passed test valuesVariants "
 
     # test allValuesVariants
@@ -393,16 +454,33 @@ def SudokuBoardTest():
     print "passed test allValuesVariants"
 
     # test getVariants
-    # print TestBoard.getVariants()
-    # print TestBoard.getV ariants((0,1))
     assert TestBoard.getVariants((0,1)) == [1, 2, 4, 6], "getVariants failed for HB (0,1)"
 
     # test MRV
     # print TestCSP.MRV(TestBoard)
-    assert TestBoard.MRV(TestBoard) == ((7, 6), [3, 9]), "MVR failed for HB"
+    assert TestBoard.MRV() == ((7, 6), [3, 9]), "MVR failed for HB"
     print "passed test MVR"
 
+    # test getQuadrantNeighbors
+    assert TestBoard.getQuadrantNeighbors((7, 6)) == [(6, 7), (6, 8), (8, 7), (8, 8)], "getQuadrantNeighbors failed for HB"
+    assert TestBoard.getQuadrantNeighbors((0, 0)) == [(1, 1), (1, 2), (2, 1), (2, 2)], "getQuadrantNeighbors failed for HB"
+    print "passed test getQuadrantNeighbors"
 
+    # test updateVariants
+    ini_variants = TestBoard.allValuesVariants()
+    def printVariants(variants):
+        for row in range(TestBoard.getBoardDim()):
+            vars = []
+            for col in range(TestBoard.getBoardDim()):
+                vars.append(variants[TestBoard.cellToIndex((row,col))])
+            print vars
+        print
+    # printVariants(ini_variants)
+    TestBoard.setValue((0,1), 6)
+    TestBoard.updateVariants((0,1), 6)
+    assert TestBoard.allValuesVariants() == TestGlobals.updateVariants_answerHB(), "updateVariants failed for HB"
+    TestBoard.reset()
+    print "passed test updateVariants"
 
 ## run test
 if __name__ == "__main__":
