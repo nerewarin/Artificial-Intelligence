@@ -2,19 +2,22 @@ __author__ = 'NereWARin'
 from collections import Counter
 import copy
 import math
+import TestGlobals
 
 class SudokuBoard():
     """
     Sudoku board state representation
     """
-    def __init__(self, definedNubmers, undefinedSymbol = "x"):
+    def __init__(self, definedNubmers, undefinedSymbol = "x", numbers = range(1, 10)):
         """
         self.board constructor
         :param definedNubmers: dict of predefined  {location : number} pairs
-        :param undefinedSymbol: symbol for empty cells
+        :param undefinedSymbol: symbol used for marking empty cells
+        :param numbers: list -- what numbers can be placed to cell
         :return:
         """
-        self.dimension = 9
+        self.numbers = numbers
+        self.dimension = len(numbers)
         self.quadDim = int(math.sqrt(self.dimension))
         self.empty = undefinedSymbol
         self.board = []
@@ -25,6 +28,8 @@ class SudokuBoard():
             self.board.append(self.rows)
         for cell, value in definedNubmers.iteritems():
             self.board[cell[0]][cell[1]] = value
+        # compute all variants for every cell
+        self.ValuesVariants = self.allValuesVariants()
         # make backup copy
         self.initialBoard = copy.deepcopy(self.board)
 
@@ -204,29 +209,112 @@ class SudokuBoard():
                 quadConflicts[quad] = qCheck
         return rowConflicts, colConflicts, quadConflicts
 
-    def isGoal(self):
+    def isFull(self):
         """
 
         :param board:
         :return:
         """
-        if self.getUndefinedSymbol() in self.board:
-            return True
-        return False
+        # print self.getUndefinedSymbol(), self.board
+        for row in self.board:
+            if self.getUndefinedSymbol()  in row:
+                # print "notFull"
+                return False
+        return True
+
+    # def isGoal(self):
+    #     """
+    #
+    #     :return: True if solution complete
+    #     """
+
+    def getNumbers(self):
+        return self.numbers
+
+    def valuesVariants(self, cell):
+        """
+        returns values that we can place in a given cell not violating constraints
+        :param board: Sudoku board state
+        :param cell:
+        :return:
+        """
+        if not self.isEmpty(cell):
+            return [self.getValue(cell)]
+        variants = self.getNumbers()
+        result = []
+        for value in variants:
+            brd = self.copy()
+            brd.setValue(cell, value)
+            # print "cell", cell, "var", value, brd.checkAll(cell)
+            problems = False
+            for problem in  brd.checkAll(cell):
+            # if  brd.checkAll(cell) != ({}, {}, {}):
+                if problem: problems = True
+            if not problems:
+                result.append(value)
+        return result
+
+    def allValuesVariants(self):
+        """
+        compute valuesVariants for every cell
+        :param board:
+        :return: list of lists (variants in cell 0,0 .. 0,1 ... 0,x.. x,x)
+        """
+        bDim = range(self.getBoardDim())
+        return [self.valuesVariants((row, col)) for row in bDim for col in bDim]
+
+    def getVariants(self, cell = "all"):
+        if cell == "all":
+            return self.ValuesVariants
+        return self.ValuesVariants[self.cellToIndex(cell)]
+
+    def cellToIndex(self, (row, col)):
+        """
+        comvert tuple (row, col) to index
+        :return:
+        """
+        return row * self.getBoardDim()+ col
+
+    def MRV(self, board):
+        """
+        Minimum Remaining Values
+
+        :param board:  Sudoku board state
+        :return: cell index corresponds to minimum number of values variant
+        if there are several cells vs the same variants numbers exists, returns the last
+        """
+
+        # values in every cell -- self.allValuesVariants()
+        bDim = board.getBoardDim()
+        cell = (None, None)
+        minValue = board.getBoardDim()
+        values = self.getNumbers() # [1, 2, .. , 9]
+        for ind, allValues in enumerate(self.allValuesVariants()):
+            # print ind, variants, len(variants)
+            lenValues = len(allValues)
+            if lenValues < minValue and lenValues > 1:
+                cell = (ind // bDim, ind % bDim)
+                minValue = lenValues
+                values = allValues
+                # print cell, ind, allValues
+        return cell, values
+
+
 
 ## TEST SECTION
 def SudokuBoardTest():
-    definedNubmers = {(0,0):8,
-                      (1,2):3, (1,3):6,
-                      (2,1):7,(2,4):9, (2,6):2,
-                      (3,1):5, (3,5):7,
-                      (4,4):4, (4,5):5, (4,6):7,
-                      (5,3):1, (5,7):3,
-                      (6,2):1, (6,7):8, (6,8):6,
-                      (7,2):8, (7,3):5, (7,7):1,
-                      (8,1):9, (8,6):4      }
-    TestBoard    =    SudokuBoard(definedNubmers)
-    print TestBoard
+    # definedNubmers = {(0,0):8,
+    #                   (1,2):3, (1,3):6,
+    #                   (2,1):7,(2,4):9, (2,6):2,
+    #                   (3,1):5, (3,5):7,
+    #                   (4,4):4, (4,5):5, (4,6):7,
+    #                   (5,3):1, (5,7):3,
+    #                   (6,2):1, (6,7):8, (6,8):6,
+    #                   (7,2):8, (7,3):5, (7,7):1,
+    #                   (8,1):9, (8,6):4      }
+    TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
+    TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
+    # print TestBoard
 
     # test checkRow
     # check initial board
@@ -237,14 +325,14 @@ def SudokuBoardTest():
     # backup to initial board state
     # TestBoard.setValue((8,8), TestBoard.getUndefinedSymbol())
     TestBoard.reset()
-    print "test checkRow passed"
+    print "passed test checkRow"
 
     # test checkColumn
     assert TestBoard.checkColumn(1) == {}, "checkColumn failed for good testboard"
     TestBoard.setValue((1,1), 7)
     assert TestBoard.checkColumn(1) == {7: set([(1, 1), (2, 1)])}, "checkColumn passed for conflicted testboard"
     TestBoard.reset()
-    print "test checkColumn passed"
+    print "passed test checkColumn"
 
     # # getQuadrant test
     # for row in range(TestBoard.getBoardDim()):
@@ -263,7 +351,7 @@ def SudokuBoardTest():
 
     # TestBoard.setValue((0,3), 9)
     # print TestBoard.checkQuadrant(1)
-    # print "test checkQuadrant passed"
+    print "passed test checkQuadrant"
 
     # test checkAll
     TestBoard.reset()
@@ -276,12 +364,46 @@ def SudokuBoardTest():
         "checkall passed for bad testboard in all mode"
     assert TestBoard.checkAll((8, 2)) == ({8: {4: set([(8, 6), (8, 8)])}}, {}, {}), \
         "checkall passed for bad testboard in cell mode"
-    print "test checkAll passed"
+    print "passed test checkAll"
 
-    # test isGoal
+    # test isFull
     TestBoard.reset()
-    assert not TestBoard.isGoal(), "goalCheck failed for uncomplited board"
-    print "test isGoal"
+    # print TestBoard.isFull()
+    assert not TestBoard.isFull(), "goalCheck failed for uncomplited board"
+    assert TestCompleteBoard.isFull(), "goalCheck failed for complited board"
+    print "passed test isFull"
+
+    # test valuesVariants
+    # TestCSP = CSP()
+    assert TestBoard.valuesVariants((0,3)) == [2, 3, 4, 7], "valuesVariants failed for HB (0,3)"
+    assert TestBoard.valuesVariants((0,1)) == [1, 2, 4, 6], "valuesVariants failed for HB (0,1)"
+    # boardDim = TestBoard.getBoardDim()
+    # for row in range(boardDim):
+    #     for col in range(boardDim):
+    #         print (row, col), TestCSP.valuesVariants(TestBoard, (row, col))#, TestGlobals.valuesVariants_answerHB()[row*boardDim + col]
+            # print str(TestCSP.valuesVariants(TestBoard, (row, col))) + ","
+
+    #         assert TestCSP.valuesVariants(TestBoard, (row, col)) == \
+    #                TestGlobals.valuesVariants_answerHB()[row * boardDim+ col], "valuesVariants failed for HB"
+    print "passed test valuesVariants "
+
+    # test allValuesVariants
+    assert TestBoard.allValuesVariants() == \
+                   TestGlobals.valuesVariants_answerHB(), "allvaluesVariants failed for HB"
+    print "passed test allValuesVariants"
+
+    # test getVariants
+    # print TestBoard.getVariants()
+    # print TestBoard.getV ariants((0,1))
+    assert TestBoard.getVariants((0,1)) == [1, 2, 4, 6], "getVariants failed for HB (0,1)"
+
+    # test MRV
+    # print TestCSP.MRV(TestBoard)
+    assert TestBoard.MRV(TestBoard) == ((7, 6), [3, 9]), "MVR failed for HB"
+    print "passed test MVR"
+
+
 
 ## run test
-SudokuBoardTest()
+if __name__ == "__main__":
+    SudokuBoardTest()
