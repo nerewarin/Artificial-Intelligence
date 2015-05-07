@@ -326,15 +326,18 @@ class SudokuBoard():
         """
         bDim = range(self.getBoardDim())
         self.sortedVariants = {}
+        min_lenght = "inf"
         for row in bDim:
             for col in bDim:
                 vars = variants[row][col]
                 lenght = len(vars)
+                if lenght < min_lenght:
+                    min_lenght = lenght
                 if self.sortedVariants.has_key(lenght):
-                    self.sortedVariants[lenght].append(vars)
+                    self.sortedVariants[lenght].append((row, col))
                 else:
-                    self.sortedVariants[lenght] = [vars]
-
+                    self.sortedVariants[lenght] = [(row, col)]
+        self.minVariantsLenght = min_lenght
 
     def MRV(self):
         """
@@ -377,7 +380,13 @@ class SudokuBoard():
         # self.sub_minValue = sub_minValue
 
         # sorted version
-        print "MVR", self.sortedVariants
+        print "MVR"
+        print "self.minVariantsLenght", self.minVariantsLenght
+        print self.sortedVariants[self.minVariantsLenght]
+        # return cell, values
+        cell = self.sortedVariants[self.minVariantsLenght][0] # get first
+        row, col = cell
+        values = self.ValuesVariants[row][col]
         return cell, values
 
     def getSubMinValue(self):
@@ -440,6 +449,7 @@ class SudokuBoard():
         # update assigned cell
         # self.ValuesVariants[self.cellToIndex(cell)] = [value]
         self.ValuesVariants[row][col] = range(self.getBoardDim() + 1)
+        self.sortedVariants[self.getBoardDim() + 1].remove
         # print "update assigned cell variants", self.ValuesVariants[self.cellToIndex(cell)]
 
         # print "before update", self.ValuesVariants
@@ -454,7 +464,14 @@ class SudokuBoard():
                 if value in variants:
                     # print "before update in", (row, _col_), self.ValuesVariants[self.cellToIndex((row, _col_))]
                     if mode == "removing":
-                        variants.remove(value)
+                        self.ValuesVariants[row][_col_].remove(value)
+                        print " !!!!"
+                        # shifting variants in sorted dict
+                        print self.sortedVariants[len(variants)]
+                        print value in self.sortedVariants[len(variants)]
+                        # self.sortedVariants[len(variants)-1].append( self.sortedVariants.pop(len(variants))
+                        print "end of !!!!"
+
                     # print "after update", self.ValuesVariants[self.cellToIndex((row, _col_))]
                     else:
                         cuttedCount += 1

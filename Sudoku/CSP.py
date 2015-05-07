@@ -21,6 +21,7 @@ class CSP():
 
         # select unassigned variable
         cell, variants = board.MRV()
+        print "cell, variants", cell, variants
         if cell == (None, None):
             print "fuck"
 
@@ -35,6 +36,20 @@ class CSP():
         # variants = sorted(var_count.items(), key=operator.itemgetter(1))
         # print "SORTING WORK????", variants
 
+        # # row version (slow 08.05 day)
+        # for var in variants:
+        #     # print "assign var %s from variants %s in cell %s" % (var, variants, cell )
+        #     mBoard =  board.copy()
+        #     # mBoard.setValue(cell, var)
+        #     # mBoard.updateVariants(cell, var)
+        #     mBoard.setAndUpdate(cell, var)
+        #     result = self.BacktrackingSearch(mBoard, impossibleTag)
+        #     if result != impossibleTag:
+        #         return result
+        #     mBoard.setAndUpdate(cell, board.getUndefinedSymbol())
+        # return impossibleTag
+
+        # row version (slow 08.05 day)
         for var in variants:
             # print "assign var %s from variants %s in cell %s" % (var, variants, cell )
             mBoard =  board.copy()
