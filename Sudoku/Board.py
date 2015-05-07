@@ -26,12 +26,27 @@ class SudokuBoard():
             for col in range(self.dimension):
                 self.rows.append(self.empty)
             self.board.append(self.rows)
-        for cell, value in definedNubmers.iteritems():
-            self.board[cell[0]][cell[1]] = value
+
+        # fill defined numbers
+        if type(definedNubmers) is dict:
+            for cell, value in definedNubmers.iteritems():
+                self.board[cell[0]][cell[1]] = value
+        elif type(definedNubmers) is list:
+            for row in range(self.dimension):
+                for col in range(self.dimension):
+                    self.board[row][col] = definedNubmers[row][col]
+
         # compute all variants for every cell
         self.ValuesVariants = self.allValuesVariants()
+        # sort it in order of number of variants
+        self.sortVariants(self.ValuesVariants)
+        # compute MVR on all board
+        self.sub_minValue = self.MRV()
+
         # make backup copy
         self.initialBoard = copy.deepcopy(self.board)
+        self.initialVariants = copy.deepcopy(self.ValuesVariants)
+
 
     def __str__(self):
         str_board = "board state:"
@@ -70,16 +85,29 @@ class SudokuBoard():
     def getValue(self, cell):
         """
         :param cell: tuple (row, column)
-        :return: value in this cell
+        :return: current value in this cell
         """
         return self.board[cell[0]][cell[1]]
 
     def setValue(self, cell, value):
         """
         :param cell: tuple (row, column)
-        :return: value in this cell
+        :return: new value in this cell
         """
         self.board[cell[0]][cell[1]] = value
+
+    def setAndUpdate(self, cell, value):
+        """
+        set value to board and update variants in all cells
+        :param cell: tuple (row, column)
+        :param value: new value in this cell
+        :return:
+        """
+        self.setValue(cell, value)
+        self.updateVariants(cell, value)
+
+    # def clearValue(self, cell):
+    #     self.board[cell[0]][cell[1]] = self.getUndefinedSymbol()
 
     def isEmpty(self, cell):
         """
@@ -94,6 +122,7 @@ class SudokuBoard():
         reset board to initial state
         """
         self.board = copy.deepcopy(self.initialBoard)
+        self.ValuesVariants = copy.deepcopy(self.initialVariants)
 
     def copy(self):
         return copy.deepcopy(self)
@@ -239,7 +268,8 @@ class SudokuBoard():
         :return:
         """
         if not self.isEmpty(cell):
-            return [self.getValue(cell)]
+            # return [self.getValue(cell)]
+            return range(self.getBoardDim()+1)
         variants = self.getNumbers()
         result = []
         for value in variants:
@@ -261,12 +291,24 @@ class SudokuBoard():
         :return: list of lists (variants in cell 0,0 .. 0,1 ... 0,x.. x,x)
         """
         bDim = range(self.getBoardDim())
-        return [self.valuesVariants((row, col)) for row in bDim for col in bDim]
+        return [[self.valuesVariants((row, col)) for col in bDim] for row in bDim]
+
+    def printVariants(self):
+        variants = self.getVariants()
+        for row in range(self.getBoardDim()):
+            # vars = []
+            # for col in range(TestBoard.getBoardDim()):
+            #     vars.append(variants[TestBoard.cellToIndex((row,col))])
+            # print vars
+            print variants[row]
+        print
 
     def getVariants(self, cell = "all"):
         if cell == "all":
             return self.ValuesVariants
-        return self.ValuesVariants[self.cellToIndex(cell)]
+        # return self.ValuesVariants[self.cellToIndex(cell)]
+        row, col = cell
+        return self.ValuesVariants[row][col]
 
     def cellToIndex(self, (row, col)):
         """
@@ -274,6 +316,25 @@ class SudokuBoard():
         :return:
         """
         return row * self.getBoardDim()+ col
+
+    def sortVariants(self, variants):
+        """
+        sort list where index = cell [row][col] and value = list variants
+        to dict where key = group with how much variants, value = cells with that number of variants
+        :param variants:
+        :return:
+        """
+        bDim = range(self.getBoardDim())
+        self.sortedVariants = {}
+        for row in bDim:
+            for col in bDim:
+                vars = variants[row][col]
+                lenght = len(vars)
+                if self.sortedVariants.has_key(lenght):
+                    self.sortedVariants[lenght].append(vars)
+                else:
+                    self.sortedVariants[lenght] = [vars]
+
 
     def MRV(self):
         """
@@ -288,31 +349,97 @@ class SudokuBoard():
         bDim = self.getBoardDim()
         cell = (None, None)
         minValue = self.getBoardDim()
+        sub_minValue = self.getBoardDim()
         values = self.getNumbers() # [1, 2, .. , 9]
-        for ind, allValues in enumerate(self.allValuesVariants()):
-            # print ind, variants, len(variants)
-            lenValues = len(allValues)
-            if lenValues < minValue and lenValues > 1:
-                cell = (ind // bDim, ind % bDim)
-                minValue = lenValues
-                values = allValues
-                # print cell, ind, allValues
+
+        # index version
+        # for ind, allValues in enumerate(self.allValuesVariants()):
+        #     # print ind, variants, len(variants)
+        #     lenValues = len(allValues)
+        #     if lenValues < minValue and lenValues > 1:
+        #         cell = (ind // bDim, ind % bDim)
+        #         minValue = lenValues
+        #         values = allValues
+        #         # print cell, ind, allValues
+
+        # # row version
+        # allValues = self.allValuesVariants()
+        # for row in range(bDim):
+        #     for col in range(bDim):
+        #         variants = allValues[row][col]
+        #         lenValues = len(variants)
+        #         # if lenValues <= minValue and lenValues > 1:
+        #         if lenValues < minValue:
+        #             cell = (row, col)
+        #             minValue = lenValues
+        #             sub_minValue = minValue
+        #             values = variants
+        # self.sub_minValue = sub_minValue
+
+        # sorted version
+        print "MVR", self.sortedVariants
         return cell, values
 
-    def updateVariants(self, cell, value):
+    def getSubMinValue(self):
+        return self.sub_minValue
+
+    def FastMRV(self):
+        """
+        Fast Minimum Remaining Values
+        it compares only subchampion from previous run
+            with MVR of cells wich were modified
+
+        :param board:  Sudoku board state
+        :return: cell index corresponds to minimum number of values variant
+        if there are several cells vs the same variants numbers exists, returns the last
+        """
+
+        # values in every cell -- self.allValuesVariants()
+        bDim = self.getBoardDim()
+        cell = (None, None)
+        minValue = self.getBoardDim()
+        values = self.getNumbers() # [1, 2, .. , 9]
+
+        # index version
+        # for ind, allValues in enumerate(self.allValuesVariants()):
+        #     # print ind, variants, len(variants)
+        #     lenValues = len(allValues)
+        #     if lenValues < minValue and lenValues > 1:
+        #         cell = (ind // bDim, ind % bDim)
+        #         minValue = lenValues
+        #         values = allValues
+        #         # print cell, ind, allValues
+
+        # row version
+        allValues = self.allValuesVariants()
+        for row in range(bDim):
+            for col in range(bDim):
+                variants = allValues[row][col]
+                lenValues = len(variants)
+                # if lenValues <= minValue and lenValues > 1:
+                if lenValues <= minValue:
+                    cell = (row, col)
+                    minValue = lenValues
+                    values = variants
+        return cell, values
+
+    def updateVariants(self, cell, value, mode = "removing"):
         """
         exclude value after assignment to cell from variants in its row, col and quadrant
         :param cell:  where assignment was
         :param value: what was assigned
+        : param mode: if removing, do removing, if ordering, just estimate count of values that will be cutted
         :return: nth but update self.
         """
         row, col = cell
         bDim = range(self.getBoardDim())
+        cuttedCount = 0
         # quadrant = self.getQuadrant(cell)
         # quadDim = self.getQuadDim() # number of cells in a single row or column of quadrant (= 3)
 
         # update assigned cell
-        self.ValuesVariants[self.cellToIndex(cell)] = [value]
+        # self.ValuesVariants[self.cellToIndex(cell)] = [value]
+        self.ValuesVariants[row][col] = range(self.getBoardDim() + 1)
         # print "update assigned cell variants", self.ValuesVariants[self.cellToIndex(cell)]
 
         # print "before update", self.ValuesVariants
@@ -321,28 +448,43 @@ class SudokuBoard():
         for _col_ in bDim:
             if _col_ != col:
                 # print "row, col, index",  row, _col_, self.cellToIndex((row, _col_))
-                variants = self.ValuesVariants[self.cellToIndex((row, _col_))]
+                # variants = self.ValuesVariants[self.cellToIndex((row, _col_))]
+                variants = self.ValuesVariants[row][_col_]
                 # print variants
                 if value in variants:
                     # print "before update in", (row, _col_), self.ValuesVariants[self.cellToIndex((row, _col_))]
-                    variants.remove(value)
+                    if mode == "removing":
+                        variants.remove(value)
                     # print "after update", self.ValuesVariants[self.cellToIndex((row, _col_))]
+                    else:
+                        cuttedCount += 1
 
         # update column
         for _row_ in bDim:
             if _row_ != row:
-                variants = self.ValuesVariants[self.cellToIndex((_row_, col))]
+                # variants = self.ValuesVariants[self.cellToIndex((_row_, col))]
+                variants = self.ValuesVariants[_row_][col]
                 if value in variants:
-                    variants.remove(value)
+                    if mode == "removing":
+                        variants.remove(value)
+                    else:
+                        cuttedCount += 1
 
         # update quadrant
         # we just update four cells, which are not in a same row (cause it had been already updated)
         # and not in the same column
         neighbors = self.getQuadrantNeighbors(cell)
         for neighbor in neighbors:
-            variants = self.ValuesVariants[self.cellToIndex(neighbor)]
+            # variants = self.ValuesVariants[self.cellToIndex(neighbor)]
+            variants = self.ValuesVariants[neighbor[0]][neighbor[1]]
             if value in variants:
-                variants.remove(value)
+                if mode == "removing":
+                    variants.remove(value)
+                else:
+                    cuttedCount += 1
+
+        if mode == "ordering":
+            return cuttedCount
 
     def getQuadrantNeighbors(self, cell):
         """
@@ -449,15 +591,17 @@ def SudokuBoardTest():
     print "passed test valuesVariants "
 
     # test allValuesVariants
+    # TestBoard.printVariants()
     assert TestBoard.allValuesVariants() == \
                    TestGlobals.valuesVariants_answerHB(), "allvaluesVariants failed for HB"
     print "passed test allValuesVariants"
 
     # test getVariants
+    # print TestBoard.getVariants((0,1))
     assert TestBoard.getVariants((0,1)) == [1, 2, 4, 6], "getVariants failed for HB (0,1)"
 
     # test MRV
-    # print TestCSP.MRV(TestBoard)
+    # print TestBoard.MRV()
     assert TestBoard.MRV() == ((7, 6), [3, 9]), "MVR failed for HB"
     print "passed test MVR"
 
@@ -468,19 +612,27 @@ def SudokuBoardTest():
 
     # test updateVariants
     ini_variants = TestBoard.allValuesVariants()
-    def printVariants(variants):
-        for row in range(TestBoard.getBoardDim()):
-            vars = []
-            for col in range(TestBoard.getBoardDim()):
-                vars.append(variants[TestBoard.cellToIndex((row,col))])
-            print vars
-        print
+
     # printVariants(ini_variants)
     TestBoard.setValue((0,1), 6)
+    # assert TestBoard.allValuesVariants() == \
+    #                TestGlobals.valuesVariants_answerHB(), "allvaluesVariants failed for HB after Set but before update"
+
     TestBoard.updateVariants((0,1), 6)
+    # TestBoard.printVariants()
+    # print  TestBoard.allValuesVariants()
     assert TestBoard.allValuesVariants() == TestGlobals.updateVariants_answerHB(), "updateVariants failed for HB"
     TestBoard.reset()
     print "passed test updateVariants"
+
+    # test setAndUpdate
+    # TestBoard.printVariants()
+    TestBoard.setAndUpdate((8,8), 3)
+    # TestBoard.printVariants()
+    assert TestBoard.allValuesVariants() == TestGlobals.updateVariants_answerHB_883(), "updateVariants failed for HB 883"
+    # print TestBoard.allValuesVariants()
+    print "passed test setAndUpdate"
+
 
 ## run test
 if __name__ == "__main__":
