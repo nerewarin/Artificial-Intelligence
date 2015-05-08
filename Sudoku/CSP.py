@@ -20,6 +20,7 @@ class CSP():
             return board
 
         # select unassigned variable
+        print "BacktrackingSearch get MVR"
         cell, variants = board.MRV()
         print "cell, variants", cell, variants
         if cell == (None, None):
@@ -51,7 +52,7 @@ class CSP():
 
         # row version (slow 08.05 day)
         for var in variants:
-            # print "assign var %s from variants %s in cell %s" % (var, variants, cell )
+            print "assign var %s from variants %s in cell %s" % (var, variants, cell )
             mBoard =  board.copy()
             # mBoard.setValue(cell, var)
             # mBoard.updateVariants(cell, var)
@@ -64,10 +65,11 @@ class CSP():
 
 def CSPtest():
     # test boards
+    print "initialize test boards"
     TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
-    TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
-    TestEasyBoard     = SudokuBoard(TestGlobals.definedNubmers_EB())
-    TestHB2           = SudokuBoard(TestGlobals.definedNubmers_HB2())
+    # TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
+    # TestEasyBoard     = SudokuBoard(TestGlobals.definedNubmers_EB())
+    # TestHB2           = SudokuBoard(TestGlobals.definedNubmers_HB2())
 
     # test BacktrackingSearch
     TestCSP = CSP()
