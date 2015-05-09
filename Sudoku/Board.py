@@ -450,7 +450,7 @@ class SudokuBoard():
         return cell, values
 
 
-    def updateSortVariants(self, cell, value, mode = "removing"):
+    def updateSortVariants(self, cell, value, mode = "removing", filled_sing = "*"):
         """
         update variants order by MVR criteria after assigning cell with value
         :param cell: cell to assign
@@ -546,60 +546,71 @@ class SudokuBoard():
         # update row
         for _col_ in bDim:
             if _col_ != col:
-                # print "row, col, index",  row, _col_, self.cellToIndex((row, _col_))
-                # variants = self.ValuesVariants[self.cellToIndex((row, _col_))]
-                variants = self.ValuesVariants[row][_col_]
-                # print "[row][_col_] variants", (row,_col_), variants
-                if variants != filled_sing:
-                    if value in variants:
-                        # print "before update in", (row, _col_), self.ValuesVariants[self.cellToIndex((row, _col_))]
-                        if mode == "removing":
-                            old_key_in_sort = len(variants)
-                            new_key = len(variants) - 1
-                            self.sortedVariants[new_key].append(self.sortedVariants[old_key_in_sort].pop((row, _col_)))
-                            self.ValuesVariants[row][_col_].remove(value)
+                cell = (row, _col_)
+                self.updateCellVar(cell, value, mode, filled_sing)
 
-
-                        # print "after update", self.ValuesVariants[self.cellToIndex((row, _col_))]
-                        else:
-                            cuttedCount += 1
 
         # update column
         for _row_ in bDim:
             if _row_ != row:
-                # variants = self.ValuesVariants[self.cellToIndex((_row_, col))]
-                variants = self.ValuesVariants[_row_][col]
-                if variants != filled_sing:
-                    if value in variants:
-                        if mode == "removing":
-                            old_key_in_sort = len(variants)
-                            new_key = len(variants) - 1
-                            self.sortedVariants[new_key].append(self.sortedVariants[old_key_in_sort].pop((row, _col_)))
-
-                            variants.remove(value)
-                        else:
-                            cuttedCount += 1
+                cell = (_row_, col)
+                self.updateCellVar(cell, value, mode, filled_sing)
+                # # variants = self.ValuesVariants[self.cellToIndex((_row_, col))]
+                # variants = self.ValuesVariants[_row_][col]
+                # if variants != filled_sing:
+                #     if value in variants:
+                #         if mode == "removing":
+                #             old_key_in_sort = len(variants)
+                #             new_key = len(variants) - 1
+                #             self.sortedVariants[new_key].append(self.sortedVariants[old_key_in_sort].pop((row, _col_)))
+                #
+                #             variants.remove(value)
+                #         else:
+                #             cuttedCount += 1
 
         # update quadrant
         # we just update four cells, which are not in a same row (cause it had been already updated)
         # and not in the same column
         neighbors = self.getQuadrantNeighbors(cell)
         for neighbor in neighbors:
-            # variants = self.ValuesVariants[self.cellToIndex(neighbor)]
-            variants = self.ValuesVariants[neighbor[0]][neighbor[1]]
-            if variants != filled_sing:
-                if value in variants:
-                    if mode == "removing":
-                        old_key_in_sort = len(variants)
-                        new_key = len(variants) - 1
-                        self.sortedVariants[new_key].append(self.sortedVariants[old_key_in_sort].pop((row, _col_)))
-
-                        variants.remove(value)
-                    else:
-                        cuttedCount += 1
+            self.updateCellVar(neighbor, value, mode, filled_sing)
+            # # variants = self.ValuesVariants[self.cellToIndex(neighbor)]
+            # variants = self.ValuesVariants[neighbor[0]][neighbor[1]]
+            # if variants != filled_sing:
+            #     if value in variants:
+            #         if mode == "removing":
+            #             old_key_in_sort = len(variants)
+            #             new_key = len(variants) - 1
+            #             self.sortedVariants[new_key].append(self.sortedVariants[old_key_in_sort].pop((row, _col_)))
+            #
+            #             variants.remove(value)
+            #         else:
+            #             cuttedCount += 1
 
         if mode == "ordering":
             return cuttedCount
+
+    def updateCellVar(self, cell, value, mode, filled_sing):
+        # print "row, col, index",  row, _col_, self.cellToIndex((row, _col_))
+        # variants = self.ValuesVariants[self.cellToIndex((row, _col_))]
+        variants = self.ValuesVariants[cell[0]][cell[1]]
+        # print "[row][_col_] variants", (row,_col_), variants
+        if variants != filled_sing:
+            if value in variants:
+                # print "before update in", (row, _col_), self.ValuesVariants[self.cellToIndex((row, _col_))]
+                if mode == "removing":
+                    old_key_in_sort = len(variants)
+                    new_key = len(variants) - 1
+                    # print "self.sortedVariants[old_key_in_sort]", self.sortedVariants[old_key_in_sort]
+                    self.sortedVariants[new_key].append(cell)
+                    # del self.sortedVariants[old_key_in_sort][(row, _col_)]
+                    self.sortedVariants[old_key_in_sort].remove(cell)
+                    self.ValuesVariants[cell[0]][cell[1]].remove(value)
+
+
+                # # print "after update", self.ValuesVariants[self.cellToIndex((row, _col_))]
+                # else:
+                #     cuttedCount += 1
 
     def getQuadrantNeighbors(self, cell):
         """

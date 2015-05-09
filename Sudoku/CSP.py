@@ -23,8 +23,8 @@ class CSP():
         print "BacktrackingSearch get MVR"
         cell, variants = board.MRV()
         print "cell, variants", cell, variants
-        if cell == (None, None):
-            print "fuck"
+        # if cell == (None, None):
+        #     print "fuck"
 
         # # try every var to order
         # var_count = {}
