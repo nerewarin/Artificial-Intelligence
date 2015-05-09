@@ -60,6 +60,7 @@ class CSP():
             result = self.BacktrackingSearch(mBoard, impossibleTag)
             if result != impossibleTag:
                 return result
+            print "backup UndefinedSymbol in cell", cell
             mBoard.setAndUpdate(cell, board.getUndefinedSymbol())
         return impossibleTag
 
