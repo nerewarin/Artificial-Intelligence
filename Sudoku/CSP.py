@@ -18,49 +18,15 @@ class CSP():
         """
         if board.isFull():
             return board
-
         # select unassigned variable
-        # print "BacktrackingSearch get MVR"
         cell, variants = board.MRV()
-        # print "cell, variants", cell, variants
-
-
-        # # try every var to order
-        # var_count = {}
-        # for var in variants:
-        #     count = board.updateVariants(cell, var, "ordering")
-        #     print var, count, variants
-        #     var_count[var] = count
-        # # sorting
-        # # variants = sorted(var_count.keys(), key=var_count.values())
-        # variants = sorted(var_count.items(), key=operator.itemgetter(1))
-        # print "SORTING WORK????", variants
-
-        # # row version (slow 08.05 day)
-        # for var in variants:
-        #     # print "assign var %s from variants %s in cell %s" % (var, variants, cell )
-        #     mBoard =  board.copy()
-        #     # mBoard.setValue(cell, var)
-        #     # mBoard.updateVariants(cell, var)
-        #     mBoard.setAndUpdate(cell, var)
-        #     result = self.BacktrackingSearch(mBoard, impossibleTag)
-        #     if result != impossibleTag:
-        #         return result
-        #     mBoard.setAndUpdate(cell, board.getUndefinedSymbol())
-        # return impossibleTag
-
-        # row version (slow 08.05 day)
         for var in variants:
-            # print "assign var %s from variants %s in cell %s" % (var, variants, cell )
             mBoard =  board.copy()
-            # mBoard.setValue(cell, var)
-            # mBoard.updateVariants(cell, var)
             mBoard.setAndUpdate(cell, var)
             result = self.BacktrackingSearch(mBoard, impossibleTag)
             if result != impossibleTag:
                 return result
             # print "backup UndefinedSymbol in cell", cell
-            # mBoard.setAndUpdate(cell, board.getUndefinedSymbol())
             mBoard.clearAndUpdate(cell)
         return impossibleTag
 
