@@ -104,9 +104,19 @@ class SudokuBoard():
         :param value: new value in this cell
         :return:
         """
+        self.backupBoard = copy.deepcopy(self.board)
+        self.backupVariants = copy.deepcopy(self.ValuesVariants)
+        self.backupSorted = copy.deepcopy(self.sortedVariants)
+
         self.setValue(cell, value)
         self.updateVariants(cell, value)
         # self.updateSortVariants(cell, value)
+
+    def clearAndUpdate(self, cell):
+        "clear value in cell and restore variants and sorted variants"
+        self.board = self.backupBoard
+        self.ValuesVariants = self.backupVariants
+        self.sortedVariants = self.backupSorted
 
     # def clearValue(self, cell):
     #     self.board[cell[0]][cell[1]] = self.getUndefinedSymbol()
@@ -400,17 +410,17 @@ class SudokuBoard():
         # self.sub_minValue = sub_minValue
 
         # sorted version
-        print "MVR entry, getMinVarLen = ", self.getMinVarLen()
-        print self.sortedVariants[self.getMinVarLen()]
-        # return cell, values
+        # print "MVR entry, getMinVarLen = ", self.getMinVarLen()
+        # print "self.sortedVariants[self.getMinVarLen()]", self.sortedVariants[self.getMinVarLen()]
+        ## return cell, values
         cell = self.sortedVariants[self.getMinVarLen()][0] # get first
         row, col = cell
         values = self.ValuesVariants[row][col]
-        print "MVR returns", cell, values
+        # print "MVR returns", cell, values
         return cell, values
 
-    def getSubMinValue(self):
-        return self.sub_minValue
+    # def getSubMinValue(self):
+    #     return self.sub_minValue
 
     # def getSortedVariants(self):
     #     return self.sortedVariants
@@ -472,9 +482,9 @@ class SudokuBoard():
 
         # update assigned cell
         self.sortedVariants[min_lenght].remove(cell)
-        print "removed assigned cell", self.sortedVariants[min_lenght]
+        # print "removed assigned cell", self.sortedVariants[min_lenght]
 
-        print "IF VALUES WERE UPDATED, SHIFT IT IN SORT!"
+        # print "IF VALUES WERE UPDATED, SHIFT IT IN SORT!"
         # update row
         for _col_ in bDim:
             if _col_ != col:
@@ -596,11 +606,14 @@ class SudokuBoard():
             #         else:
             #             cuttedCount += 1
 
-        while self.sortedVariants[self.getMinVarLen()] == []:
-            print "self.getMinVarLen = ", self.getMinVarLen()
-            print "self.sortedVariants[self.getMinVarLen()]", self.sortedVariants[self.getMinVarLen()]
-            self.setMinVarLen("+1")
-            print "increment self.getMinVarLen", self.sortedVariants[self.getMinVarLen()]
+        # # print "sortedVariants before value", self.sortedVariants
+        # if self.sortedVariants == {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: []}:
+        #     print "aha!"
+        # while self.sortedVariants[self.getMinVarLen()] == []: #and (self.getMinVarLen() < self.getBoardDim()):
+        #     # print "self.getMinVarLen = ", self.getMinVarLen()
+        #     # print "self.sortedVariants[self.getMinVarLen()]", self.sortedVariants[self.getMinVarLen()]
+        #     self.setMinVarLen("+1")
+        #     # print "increment self.getMinVarLen", self.sortedVariants[self.getMinVarLen()]
 
         if mode == "ordering":
             return cuttedCount
@@ -611,7 +624,7 @@ class SudokuBoard():
         row, col = cell
         variants = self.ValuesVariants[row][col]
         old_key_in_sort = len(variants)
-        print "update cell vars in", cell, "by removing", value, "from", variants
+        # print "update cell vars in", cell, "by removing", value, "from", variants
         if value == filled_sing:
             self.ValuesVariants[row][col] = filled_sing
             # for key, val in self.sortedVariants.items():
@@ -619,7 +632,10 @@ class SudokuBoard():
             # print "self.sortedVariants =", self.sortedVariants
             if cell in self.sortedVariants[old_key_in_sort]:
                 self.sortedVariants[old_key_in_sort].remove(cell)
+                if self.sortedVariants[old_key_in_sort] == []:
+                    self.setMinVarLen(self.getMinVarLen() + 1)
         if variants != filled_sing:
+        # else:
             if value in variants:
                 # print "before update in", (row, _col_), self.ValuesVariants[self.cellToIndex((row, _col_))]
                 if mode == "removing":
@@ -632,12 +648,12 @@ class SudokuBoard():
                     # print "!!", self.sortedVariants, "\n", self.sortedVariants[old_key_in_sort], cell
                     self.sortedVariants[old_key_in_sort].remove(cell)
                     self.ValuesVariants[row][col].remove(value)
-                    print "updated cell vars", self.ValuesVariants[row][col]
+                    # print "updated cell vars", self.ValuesVariants[row][col]
                     # print "updated sorted_okey", self.sortedVariants[old_key_in_sort]
                     # print "updated sorted_nkey", self.sortedVariants[new_key]
 
                     if new_key < self.getMinVarLen():
-                        print "update setMinVarLen"
+                        # print "update setMinVarLen"
                         self.setMinVarLen(new_key)
                 # # print "after update", self.ValuesVariants[self.cellToIndex((row, _col_))]
                 # else:
