@@ -1,11 +1,11 @@
 __author__ = 'NereWARin'
 # import Board
-import TestGlobals, operator, time
+import TestGlobals, time # , operator
 from Board import SudokuBoard
 
 class CSP():
-    def __init__(self, numbers = range(1, 10)):
-        self.numbers = numbers
+    # def __init__(self, numbers = range(1, 10)):
+    #     self.numbers = numbers
 
 
 
@@ -40,21 +40,14 @@ def CSPtest():
 
     # test BacktrackingSearch
     TestCSP = CSP()
-    # boardDim = TestBoard.getBoardDim()
-    # for row in range(boardDim):
-    #     for col in range(boardDim):
-    #         print (row, col), TestCSP.valuesVariants(TestBoard, (row, col))#, TestGlobals.valuesVariants_answerHB()[row*boardDim + col]
-            # print str(TestCSP.valuesVariants(TestBoard, (row, col))) + ","
-
-    #         assert TestCSP.valuesVariants(TestBoard, (row, col)) == \
-    #                TestGlobals.valuesVariants_answerHB()[row * boardDim+ col], "valuesVariants failed for HB"
 
     print "BacktrackingSearch HB"
     start_time = time.time()
     answerHB = TestCSP.BacktrackingSearch(TestBoard)
     print answerHB
-    # assert answerHB == TestGlobals.getAnswer_SolutionHB(), "unknown solution HB"
+    assert answerHB.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
     print "time to compute =",time.time() - start_time
+
 
     # print "BacktrackingSearch Easy Board"
     # easySolution =  TestCSP.BacktrackingSearch(TestEasyBoard)

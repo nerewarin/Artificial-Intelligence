@@ -408,18 +408,21 @@ class SudokuBoard():
         row, col = cell
         variants = self.ValuesVariants[row][col]
         old_key_in_sort = len(variants)
+        # UPDATE AFTER ASSIGNMENT VALUE TO THIS CELLSO WE MARK THAT NO MORE VARIANTS AVAILABLE IN THIS CELL
         if value == filled_sing:
             self.ValuesVariants[row][col] = filled_sing
             if cell in self.sortedVariants[old_key_in_sort]:
                 self.sortedVariants[old_key_in_sort].remove(cell)
                 if self.sortedVariants[old_key_in_sort] == []:
                     self.setMinVarLen(self.getMinVarLen() + 1)
+        # UPDATE VARIANTS IN CELL AFTER ASSIGNMENT VALUE TO NEIGHBOR CELL, SO WE DELETE VALUE TO VARIANTS
         if variants != filled_sing:
             if value in variants:
                 if mode == "removing":
                     new_key = len(variants) - 1
                     self.sortedVariants[new_key].append(cell)
-                    self.sortedVariants[old_key_in_sort].remove(cell)
+                    if cell in self.sortedVariants[old_key_in_sort]:
+                        self.sortedVariants[old_key_in_sort].remove(cell)
                     self.ValuesVariants[row][col].remove(value)
 
                     if new_key < self.getMinVarLen():
@@ -531,6 +534,7 @@ def SudokuBoardTest():
 
     # test allValuesVariants
     # TestBoard.printVariants()
+    # print  TestBoard.allValuesVariants()
     assert TestBoard.allValuesVariants() == \
                    TestGlobals.valuesVariants_answerHB(), "allvaluesVariants failed for HB"
     print "passed test allValuesVariants"
@@ -568,6 +572,7 @@ def SudokuBoardTest():
     # TestBoard.printVariants()
     TestBoard.setAndUpdate((8,8), 3)
     # TestBoard.printVariants()
+    # print TestBoard.allValuesVariants()
     assert TestBoard.allValuesVariants() == TestGlobals.updateVariants_answerHB_883(), "updateVariants failed for HB 883"
     # print TestBoard.allValuesVariants()
     print "passed test setAndUpdate"
