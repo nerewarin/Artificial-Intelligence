@@ -45,7 +45,7 @@ class SudokuBoard():
         # make backup copy
         self.initialBoard = copy.deepcopy(self.board)
         self.initialVariants = copy.deepcopy(self.ValuesVariants)
-
+        self.initialSorted = copy.deepcopy(self.sortedVariants)
 
     def __str__(self):
         str_board = "board state:"
@@ -111,7 +111,11 @@ class SudokuBoard():
         # self.updateSortVariants(cell, value) # included to updateVariants
 
     def clearAndUpdate(self, cell):
-        "clear value in cell and restore variants and sorted variants"
+        """
+        clear value in cell and restore variants and sorted variants
+        :param cell:
+        :return:
+        """
         self.board = self.backupBoard
         self.ValuesVariants = self.backupVariants
         self.sortedVariants = self.backupSorted
@@ -128,8 +132,12 @@ class SudokuBoard():
         """
         reset board to initial state
         """
-        self.board = copy.deepcopy(self.initialBoard)
-        self.ValuesVariants = copy.deepcopy(self.initialVariants)
+        # self.board = copy.deepcopy(self.initialBoard)
+        # self.ValuesVariants = copy.deepcopy(self.initialVariants)
+        # self.sortedVariants = copy.deepcopy(self.initialSorted)
+        self.board = self.initialBoard
+        self.ValuesVariants = self.initialVariants
+        self.sortedVariants = self.initialSorted
 
     def copy(self):
         return copy.deepcopy(self)
@@ -247,7 +255,7 @@ class SudokuBoard():
 
     def isFull(self):
         """
-
+        return True if boards hasn't empty cells
         :param board:
         :return:
         """
@@ -299,6 +307,11 @@ class SudokuBoard():
         print
 
     def getVariants(self, cell = "all"):
+        """
+        get variants of values in specific cell or full list of all cells in form list of lists [row][col]
+        :param cell:
+        :return:
+        """
         if cell == "all":
             return self.ValuesVariants
         row, col = cell
@@ -336,6 +349,14 @@ class SudokuBoard():
         self.setMinVarLen(min_lenght)
 
     def setMinVarLen(self, min_lenght):
+        """
+        set minimum number of variants in some cell for all board
+        this function is used by MRV for quick access to cell with the minimum remaining value
+        this value will be used as a key of sortedVariants dictionarym whick stores a list of cells with this number
+        of remaining variants
+        :param min_lenght: int value to set
+        :return:
+        """
         if min_lenght == "+1":
             self.minVariantsLenght += 1
         else:
@@ -370,15 +391,16 @@ class SudokuBoard():
         row, col = cell
         bDim = range(self.getBoardDim())
 
+        # update current cell (which was assigned to value in the previous step)
         self.updateCellVar(cell, filled_sing, mode, filled_sing)
 
+        # update rows
         for _col_ in bDim:
             if _col_ != col:
                 _cell_ = (row, _col_)
                 self.updateCellVar(_cell_, value, mode, filled_sing)
 
-
-        # update column
+        # update columns
         for _row_ in bDim:
             if _row_ != row:
                 _cell_ = (_row_, col)
@@ -408,14 +430,14 @@ class SudokuBoard():
         row, col = cell
         variants = self.ValuesVariants[row][col]
         old_key_in_sort = len(variants)
-        # UPDATE AFTER ASSIGNMENT VALUE TO THIS CELLSO WE MARK THAT NO MORE VARIANTS AVAILABLE IN THIS CELL
+        # UPDATE AFTER ASSIGNMENT VALUE TO THIS CELL, SO WE MARK THAT NO MORE VARIANTS AVAILABLE IN THIS CELL
         if value == filled_sing:
             self.ValuesVariants[row][col] = filled_sing
             if cell in self.sortedVariants[old_key_in_sort]:
                 self.sortedVariants[old_key_in_sort].remove(cell)
                 if self.sortedVariants[old_key_in_sort] == []:
                     self.setMinVarLen(self.getMinVarLen() + 1)
-        # UPDATE VARIANTS IN CELL AFTER ASSIGNMENT VALUE TO NEIGHBOR CELL, SO WE DELETE VALUE TO VARIANTS
+        # ELSE, UPDATE VARIANTS IN CELL AFTER ASSIGNMENT VALUE TO NEIGHBOR CELL, SO WE DELETE VALUE TO VARIANTS
         if variants != filled_sing:
             if value in variants:
                 if mode == "removing":
@@ -430,8 +452,8 @@ class SudokuBoard():
 
     def getQuadrantNeighbors(self, cell):
         """
-
-        :param cell:    from what cell we search neighbors
+        helper func to find cells that are neighbors by quadrant but not by row and column
+        :param cell:    for what cell we search neighbors
         :return:    cells that are neighbors only by quadrant (not in the same row or column)
         """
         row, col = cell
@@ -449,10 +471,12 @@ class SudokuBoard():
                     if _col_ != col:
                         neighbors.append((_row_, _col_))
 
-        # # checknig
-        # neigbors_quantity = (quadDim - 1) * (quadDim - 1) # just for check
-        # assert len(neighbors) == neigbors_quantity, "incorrect neigbors_quantity"
+        # # checking
+        # neighbors_quantity = (quadDim - 1) * (quadDim - 1) # just for check
+        # assert len(neighbors) == neighbors_quantity, "incorrect neighbors_quantity"
         return neighbors
+
+
 
 ## TEST SECTION
 def SudokuBoardTest():
