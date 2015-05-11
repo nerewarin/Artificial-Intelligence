@@ -42,10 +42,10 @@ class SudokuBoard():
         self.sortVariants(self.ValuesVariants)
         self.minVariantsLenght = self.getMinVarLen()
 
-        # make backup copy
-        self.initialBoard = copy.deepcopy(self.board)
-        self.initialVariants = copy.deepcopy(self.ValuesVariants)
-        self.initialSorted = copy.deepcopy(self.sortedVariants)
+        # # make backup copy - uncomment it too use self.reset() function
+        # self.initialBoard = copy.deepcopy(self.board)
+        # self.initialVariants = copy.deepcopy(self.ValuesVariants)
+        # self.initialSorted = copy.deepcopy(self.sortedVariants)
 
     def __str__(self):
         str_board = "board state:"
