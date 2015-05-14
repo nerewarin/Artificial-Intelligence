@@ -89,4 +89,5 @@ def CSPtest():
     # print hb2
 
 # run test
-CSPtest()
+if __name__ == "__main__":
+    CSPtest()
