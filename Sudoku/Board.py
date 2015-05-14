@@ -111,12 +111,14 @@ class SudokuBoard():
         """
         # create backup
         # self.backupBoard = copy.deepcopy(self.board)
-        
-        self.backupVariants = copy.deepcopy(self.ValuesVariants)
-        self.backupSorted = copy.deepcopy(self.sortedVariants)
+
+        # self.backupVariants = copy.deepcopy(self.ValuesVariants)
+        # self.backupSorted = copy.deepcopy(self.sortedVariants)
 
         self.MinVarLenBackup = self.getMinVarLen()
 
+
+        # set and update
         self.setValue(cell, value)
         self.updateVariants(cell, value)
         # self.updateSortVariants(cell, value) # included to updateVariants
@@ -129,11 +131,21 @@ class SudokuBoard():
         """
         # self.board = self.backupBoard
         self.setValue(cell, self.getUndefinedSymbol())
-        self.ValuesVariants = self.backupVariants
-        self.sortedVariants = self.backupSorted
+        # self.ValuesVariants = self.backupVariants
+        # self.sortedVariants = self.backupSorted
 
         # restore
         self.setMinVarLen(self.MinVarLenBackup)
+        # restore var
+        for key, val in self.ValuesBackup.iteritems():
+            row, col = key
+            self.ValuesVariants[row][col] = val
+        # restore sort
+        for key, val in self.sortedBackupToAdd.iteritems():
+            self.sortedVariants[key].append(val)
+        for key, val in self.sortedBackupToRemove.iteritems():
+            self.sortedVariants[key].remove(val)
+
 
     def isEmpty(self, cell):
         """
@@ -409,7 +421,7 @@ class SudokuBoard():
         self.ValuesBackup = {}
         self.sortedBackupToAdd = {}
         self.sortedBackupToRemove = {}
-        self.getMinVarLenBackup = self.getMinVarLen()
+        self.MinVarLenBackup = self.getMinVarLen()
         # update current cell (which was assigned to value in the previous step)
         self.updateCellVar(cell, filled_sing, mode, filled_sing)
 
