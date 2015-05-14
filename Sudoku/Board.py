@@ -36,13 +36,17 @@ class SudokuBoard():
                 for col in range(self.dimension):
                     self.board[row][col] = definedNubmers[row][col]
 
-    def preCompute(self):
+
+    def preCompute(self, OkTag = "Task checked OK", FailureTAG = "FAILURE! INCORRECT TASK"):
         """
         it can be moved to constructor but these computation take some time so we dont need it if if we just want to
         fill the board, not solving it.
         Otherwise, this method is called first
         :return:
         """
+        # check task
+        if self.checkAll() != ({}, {}, {}):
+            return FailureTAG
         # compute all variants for every cell
         self.ValuesVariants = self.allValuesVariants()
         # sort it in order of number of variants
@@ -53,6 +57,7 @@ class SudokuBoard():
         # self.initialBoard = copy.deepcopy(self.board)
         # self.initialVariants = copy.deepcopy(self.ValuesVariants)
         # self.initialSorted = copy.deepcopy(self.sortedVariants)
+        return OkTag
 
     def __str__(self):
         str_board = "board state:"
@@ -244,6 +249,7 @@ class SudokuBoard():
         :param cell:
         :return: tuple of results (checkRow, checkColumn, checkQuadrant), where each result has form
         {conflicted row/col/quad : {number : set(cell1, cell2..) } }
+        if all passed, return ({}, {}, {})
         """
         rowConflicts = {}
         colConflicts = {}
@@ -478,22 +484,13 @@ class SudokuBoard():
                 if mode == "removing":
                     new_key = len(variants) - 1
                     # backup
-                    # if not self.ValuesBackup.has_key(cell):
                     self.ValuesBackup[cell] = self.ValuesVariants[row][col]
-                        # print "YES"
-                    # else:
-                    #     print "NO", self.ValuesBackup[cell]
-                    #     self.ValuesBackup[cell].append(self.ValuesVariants[row][col])
                     self.sortedBackupToRemove[new_key] = cell
                     self.sortedBackupToAdd[old_key_in_sort] = cell
-
                     # update var and sort
                     self.sortedVariants[new_key].append(cell)
-                    # if cell in self.sortedVariants[old_key_in_sort]:
                     self.sortedVariants[old_key_in_sort].remove(cell)
-
                     self.ValuesVariants[row][col].remove(value)
-
                     if new_key < self.getMinVarLen():
                         self.setMinVarLen(new_key)
 
@@ -539,6 +536,8 @@ def SudokuBoardTest():
     TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
     TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
     # print TestBoard
+    TestBoard.preCompute()
+    TestCompleteBoard.preCompute()
 
     # test checkRow
     # check initial board
@@ -547,21 +546,18 @@ def SudokuBoardTest():
     TestBoard.setValue((8,8), 4)
     assert TestBoard.checkRow(8) == {4: set([(8, 6), (8, 8)])}, "checkRow passed for conflicted testboard"
     # backup to initial board state
-    # TestBoard.setValue((8,8), TestBoard.getUndefinedSymbol())
-    TestBoard.reset()
+    TestBoard.setValue((8,8), TestBoard.getUndefinedSymbol())
+    # TestBoard.reset()
     print "passed test checkRow"
 
     # test checkColumn
     assert TestBoard.checkColumn(1) == {}, "checkColumn failed for good testboard"
     TestBoard.setValue((1,1), 7)
     assert TestBoard.checkColumn(1) == {7: set([(1, 1), (2, 1)])}, "checkColumn passed for conflicted testboard"
-    TestBoard.reset()
     print "passed test checkColumn"
-
-    # # getQuadrant test
-    # for row in range(TestBoard.getBoardDim()):
-    #     for col in range(TestBoard.getBoardDim()):
-    #         print (row, col), TestBoard.getQuadrant((row, col))
+    # backup to initial board state
+    TestBoard.setValue((1,1), TestBoard.getUndefinedSymbol())
+    # TestBoard.reset()
 
     # test checkQuadrant
     goodcheckQuadrant = TestBoard.checkQuadrant(0)
@@ -571,14 +567,12 @@ def SudokuBoardTest():
     badcheckQuadrant = TestBoard.checkQuadrant(0)
     # print "bad checkQuadrant", badcheckQuadrant
     assert badcheckQuadrant == {7: [(1, 1), (2, 1)]}, "checkQuadrant failed for bad testboard"
-    TestBoard.reset()
-
-    # TestBoard.setValue((0,3), 9)
-    # print TestBoard.checkQuadrant(1)
+    # backup to initial board state
+    TestBoard.setValue((1,1), TestBoard.getUndefinedSymbol())
+    # TestBoard.reset()
     print "passed test checkQuadrant"
 
     # test checkAll
-    TestBoard.reset()
     # print TestBoard.checkAll((0,1))
     assert TestBoard.checkAll((0,1)) == ({}, {}, {}), "checkall failed for good testboard in cell mode"
     assert TestBoard.checkAll() == ({}, {}, {}), "checkall failed for good testboard in all mode"
@@ -591,7 +585,9 @@ def SudokuBoardTest():
     print "passed test checkAll"
 
     # test isFull
-    TestBoard.reset()
+    # backup to initial board state
+    TestBoard.setValue((8,8), TestBoard.getUndefinedSymbol())
+    # TestBoard.reset()
     # print TestBoard.isFull()
     assert not TestBoard.isFull(), "goalCheck failed for uncomplited board"
     assert TestCompleteBoard.isFull(), "goalCheck failed for complited board"
@@ -636,18 +632,20 @@ def SudokuBoardTest():
     # TestBoard.printVariants()
     # print  TestBoard.allValuesVariants()
     assert TestBoard.allValuesVariants() == TestGlobals.updateVariants_answerHB(), "updateVariants failed for HB"
-    TestBoard.reset()
+    # backup to initial board state
+    TestBoard.setValue((8,8), TestBoard.getUndefinedSymbol())
+    # TestBoard.reset()
     print "passed test updateVariants"
 
     # test setAndUpdate
     # TestBoard.printVariants()
+    TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
+    # print TestBoard
+    TestBoard.preCompute()
     TestBoard.setAndUpdate((8,8), 3)
-    # TestBoard.printVariants()
-    # print TestBoard.allValuesVariants()
     assert TestBoard.allValuesVariants() == TestGlobals.updateVariants_answerHB_883(), "updateVariants failed for HB 883"
     # print TestBoard.allValuesVariants()
     print "passed test setAndUpdate"
-
 
 ## run test
 if __name__ == "__main__":

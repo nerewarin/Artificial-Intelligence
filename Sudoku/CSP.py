@@ -10,10 +10,14 @@ class CSP():
 
 
     def BacktrackingSearch(self, board, impossibleTag = "Failure"):
-        # precompute -- initialize variants in every cell and sort it as a dictionary
+        # precompute -- first we check correctness of task
+        # Then, initialize variants in every cell and sort it as a dictionary
         # where key = number of possible variants (lenght of list),
         # value = list of cells with appropriate variants lenght
-        board.preCompute()
+        InitialCheck = board.preCompute()
+        if InitialCheck != "Task checked OK":
+            print str(board)
+            return InitialCheck
         # run algorithm
         return self.RecursiveBacktracking(board, impossibleTag)
 
@@ -25,6 +29,7 @@ class CSP():
         :return: complete board or "Failure"
         """
         if board.isFull():
+            print "SUCCESSFULLY RESOLVED!"
             return board
         # select unassigned variable
         cell, variants = board.MRV()
@@ -42,7 +47,7 @@ def CSPtest():
     # test boards
     print "initialize test boards"
     TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
-    # TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
+    TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
     TestEasyBoard     = SudokuBoard(TestGlobals.definedNubmers_EB())
     TestHB2           = SudokuBoard(TestGlobals.definedNubmers_HB2())
 
@@ -70,6 +75,9 @@ def CSPtest():
     assert answerHB2.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
     print "time to compute =",time.time() - start_time
 
+    print "\nBacktrackingSearch INCORRECT_COMPLETE"
+    asnwerINCORRECT_COMPLETE = TestCSP.BacktrackingSearch(TestCompleteBoard)
+    print asnwerINCORRECT_COMPLETE
 
     # print "BacktrackingSearch Easy Board"
     # easySolution =  TestCSP.BacktrackingSearch(TestEasyBoard)
