@@ -36,6 +36,13 @@ class SudokuBoard():
                 for col in range(self.dimension):
                     self.board[row][col] = definedNubmers[row][col]
 
+    def preCompute(self):
+        """
+        it can be moved to constructor but these computation take some time so we dont need it if if we just want to
+        fill the board, not solving it.
+        Otherwise, this method is called first
+        :return:
+        """
         # compute all variants for every cell
         self.ValuesVariants = self.allValuesVariants()
         # sort it in order of number of variants
@@ -102,7 +109,7 @@ class SudokuBoard():
         :param value: new value in this cell
         :return:
         """
-        self.backupBoard = copy.deepcopy(self.board)
+        # self.backupBoard = copy.deepcopy(self.board)
         self.backupVariants = copy.deepcopy(self.ValuesVariants)
         self.backupSorted = copy.deepcopy(self.sortedVariants)
 
@@ -116,7 +123,8 @@ class SudokuBoard():
         :param cell:
         :return:
         """
-        self.board = self.backupBoard
+        # self.board = self.backupBoard
+        self.setValue(cell, self.getUndefinedSymbol())
         self.ValuesVariants = self.backupVariants
         self.sortedVariants = self.backupSorted
 

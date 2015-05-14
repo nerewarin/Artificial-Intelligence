@@ -10,6 +10,14 @@ class CSP():
 
 
     def BacktrackingSearch(self, board, impossibleTag = "Failure"):
+        # precompute -- initialize variants in every cell and sort it as a dictionary
+        # where key = number of possible variants (lenght of list),
+        # value = list of cells with appropriate variants lenght
+        board.preCompute()
+        # run algorithm
+        return self.RecursiveBacktracking(board, impossibleTag)
+
+    def RecursiveBacktracking(self, board, impossibleTag = "Failure"):
         """
         recursive solution search
         :param board: input board
@@ -23,7 +31,7 @@ class CSP():
         for var in variants:
             mBoard =  board.copy()
             mBoard.setAndUpdate(cell, var)
-            result = self.BacktrackingSearch(mBoard, impossibleTag)
+            result = self.RecursiveBacktracking(mBoard, impossibleTag)
             if result != impossibleTag:
                 return result
             # print "backup UndefinedSymbol in cell", cell
@@ -35,17 +43,31 @@ def CSPtest():
     print "initialize test boards"
     TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
     # TestCompleteBoard = SudokuBoard(TestGlobals.definedNubmers_COMPLETE())
-    # TestEasyBoard     = SudokuBoard(TestGlobals.definedNubmers_EB())
-    # TestHB2           = SudokuBoard(TestGlobals.definedNubmers_HB2())
+    TestEasyBoard     = SudokuBoard(TestGlobals.definedNubmers_EB())
+    TestHB2           = SudokuBoard(TestGlobals.definedNubmers_HB2())
 
     # test BacktrackingSearch
     TestCSP = CSP()
 
-    print "BacktrackingSearch HB"
+    print "\nBacktrackingSearch HB"
     start_time = time.time()
     answerHB = TestCSP.BacktrackingSearch(TestBoard)
     print answerHB
     assert answerHB.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
+    print "time to compute =",time.time() - start_time
+
+    print "\nBacktrackingSearch EasyBoard"
+    start_time = time.time()
+    answerEB = TestCSP.BacktrackingSearch(TestEasyBoard)
+    print answerEB
+    assert answerEB.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
+    print "time to compute =",time.time() - start_time
+
+    print "\nBacktrackingSearch HB2"
+    start_time = time.time()
+    answerHB2 = TestCSP.BacktrackingSearch(TestHB2)
+    print answerHB2
+    assert answerHB2.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
     print "time to compute =",time.time() - start_time
 
 
