@@ -109,9 +109,13 @@ class SudokuBoard():
         :param value: new value in this cell
         :return:
         """
+        # create backup
         # self.backupBoard = copy.deepcopy(self.board)
+        
         self.backupVariants = copy.deepcopy(self.ValuesVariants)
         self.backupSorted = copy.deepcopy(self.sortedVariants)
+
+        self.MinVarLenBackup = self.getMinVarLen()
 
         self.setValue(cell, value)
         self.updateVariants(cell, value)
@@ -127,6 +131,9 @@ class SudokuBoard():
         self.setValue(cell, self.getUndefinedSymbol())
         self.ValuesVariants = self.backupVariants
         self.sortedVariants = self.backupSorted
+
+        # restore
+        self.setMinVarLen(self.MinVarLenBackup)
 
     def isEmpty(self, cell):
         """
@@ -398,7 +405,11 @@ class SudokuBoard():
         """
         row, col = cell
         bDim = range(self.getBoardDim())
-
+        # backup for future clearing
+        self.ValuesBackup = {}
+        self.sortedBackupToAdd = {}
+        self.sortedBackupToRemove = {}
+        self.getMinVarLenBackup = self.getMinVarLen()
         # update current cell (which was assigned to value in the previous step)
         self.updateCellVar(cell, filled_sing, mode, filled_sing)
 
@@ -440,19 +451,35 @@ class SudokuBoard():
         old_key_in_sort = len(variants)
         # UPDATE AFTER ASSIGNMENT VALUE TO THIS CELL, SO WE MARK THAT NO MORE VARIANTS AVAILABLE IN THIS CELL
         if value == filled_sing:
+            # backup
+            self.ValuesBackup[cell] = self.ValuesVariants[row][col]
+            self.sortedBackupToAdd[old_key_in_sort] = cell
+            # update var and sort
             self.ValuesVariants[row][col] = filled_sing
-            if cell in self.sortedVariants[old_key_in_sort]:
-                self.sortedVariants[old_key_in_sort].remove(cell)
-                if self.sortedVariants[old_key_in_sort] == []:
-                    self.setMinVarLen(self.getMinVarLen() + 1)
+            self.sortedVariants[old_key_in_sort].remove(cell)
+            # after assignment, if we removed all values in key = getMinVarLen, increment it
+            if not self.sortedVariants[old_key_in_sort]:
+                self.setMinVarLen(self.getMinVarLen() + 1)
         # ELSE, UPDATE VARIANTS IN CELL AFTER ASSIGNMENT VALUE TO NEIGHBOR CELL, SO WE DELETE VALUE TO VARIANTS
         if variants != filled_sing:
             if value in variants:
                 if mode == "removing":
                     new_key = len(variants) - 1
+                    # backup
+                    # if not self.ValuesBackup.has_key(cell):
+                    self.ValuesBackup[cell] = self.ValuesVariants[row][col]
+                        # print "YES"
+                    # else:
+                    #     print "NO", self.ValuesBackup[cell]
+                    #     self.ValuesBackup[cell].append(self.ValuesVariants[row][col])
+                    self.sortedBackupToRemove[new_key] = cell
+                    self.sortedBackupToAdd[old_key_in_sort] = cell
+
+                    # update var and sort
                     self.sortedVariants[new_key].append(cell)
-                    if cell in self.sortedVariants[old_key_in_sort]:
-                        self.sortedVariants[old_key_in_sort].remove(cell)
+                    # if cell in self.sortedVariants[old_key_in_sort]:
+                    self.sortedVariants[old_key_in_sort].remove(cell)
+
                     self.ValuesVariants[row][col].remove(value)
 
                     if new_key < self.getMinVarLen():
