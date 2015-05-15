@@ -123,10 +123,9 @@ class SudokuBoard():
 
         self.MinVarLenBackup = self.getMinVarLen()
 
-
         # set and update
         self.setValue(cell, value)
-        self.updateVariants(cell, value)
+        return self.updateVariants(cell, value)
         # self.updateSortVariants(cell, value) # included to updateVariants
 
     def clearAndUpdate(self, cell):
@@ -395,6 +394,8 @@ class SudokuBoard():
             self.minVariantsLenght += 1
         else:
             self.minVariantsLenght = min_lenght
+        if self.minVariantsLenght == 0:
+            print "KARAUL! self.minVariantsLenght = 0"
 
     def getMinVarLen(self):
         return self.minVariantsLenght
@@ -406,12 +407,74 @@ class SudokuBoard():
 
         :param board:  Sudoku board state
         :return: cell index corresponds to minimum number of values variant
-        if there are several cells vs the same variants numbers exists, returns the last
+        if there are several cells vs the same variants numbers exists, returns the first
         """
         cell = self.sortedVariants[self.getMinVarLen()][0] # get first
         row, col = cell
         values = self.ValuesVariants[row][col]
         return cell, values
+
+
+    def MRVandLCV(self):
+        """
+        # return cell and value with respect of Minimum Remaining Values, and for all variants of cells with minVarLen,
+        # choose returning cell and value with respect of Least Constraining Value
+
+        unlike MRV, returns complete list of pairs cell - value, ordered ny LCV
+
+        """
+        # # 1 version
+        # cells = self.sortedVariants[self.getMinVarLen()]
+        # # values = [self.ValuesVariants[cell[0]][cell[1]] for cell in cells]
+        # min_constrained = "inf"
+        # print "MRVandLCV cells", cells
+        # if cells == [(4, 1), (6, 1), (8, 3)]:
+        #     pass
+        # for cell in cells:
+        #     values = self.ValuesVariants[cell[0]][cell[1]]
+        #     lenght = len(values)
+        #     if lenght <= 1:
+        #         if lenght == 0:
+        #             return cell, "no more variants"
+        #         return cell, values[0]
+        #     # else we compare constraints after assignment for all cells
+        #     print "MRVandLCV values", values
+        #
+        #     for variant in values:
+        #         board = self.copy()
+        #         constrained = board.setAndUpdate(cell, variant)
+        #         if constrained < min_constrained:
+        #             min_constrained = constrained
+        #             MRVcell = cell
+        #             LCVvalue = variant
+        # return MRVcell, LCVvalue
+
+        # 2 version
+        cells = self.sortedVariants[self.getMinVarLen()]
+        # values = [self.ValuesVariants[cell[0]][cell[1]] for cell in cells]
+        min_constrained = "inf"
+        pairs = []
+        estimate_values = []
+        result = []
+        # print "MRVandLCV cells", cells
+        # if cells == [(4, 1), (6, 1), (8, 3)]:
+        #     pass
+        for cell in cells:
+            values = self.ValuesVariants[cell[0]][cell[1]]
+            # print "MRVandLCV values", values
+
+            for variant in values:
+                board = self.copy()
+                constrained = board.setAndUpdate(cell, variant)
+                pairs.append((cell, variant, constrained))
+                estimate_values.append(constrained)
+
+        # sort by estimate_values
+        # print "unsorted pairs", pairs
+        pairs.sort(key=lambda pairs: pairs[2])
+        print "sorted pairs", [(a, b) for a, b, c in pairs]
+        return  [(a, b) for a, b, c in pairs]
+
 
     def updateVariants(self, cell, value, mode = "removing", filled_sing = "*"):
         """
@@ -424,6 +487,8 @@ class SudokuBoard():
         """
         row, col = cell
         bDim = range(self.getBoardDim())
+        # initialize constrained cells for LCV
+        constrained = 0
         # backup for future clearing
         self.ValuesBackup = {}
         self.sortedBackupToAdd = {}
@@ -436,13 +501,13 @@ class SudokuBoard():
         for _col_ in bDim:
             if _col_ != col:
                 _cell_ = (row, _col_)
-                self.updateCellVar(_cell_, value, mode, filled_sing)
+                constrained += self.updateCellVar(_cell_, value, mode, filled_sing)
 
         # update columns
         for _row_ in bDim:
             if _row_ != row:
                 _cell_ = (_row_, col)
-                self.updateCellVar(_cell_, value, mode, filled_sing)
+                constrained += self.updateCellVar(_cell_, value, mode, filled_sing)
 
         # update quadrant
         # we just update four cells, which are not in a same row (cause it had been already updated)
@@ -450,8 +515,9 @@ class SudokuBoard():
 
         neighbors = self.getQuadrantNeighbors(cell)
         for neighbor in neighbors:
-            self.updateCellVar(neighbor, value, mode, filled_sing)
+            constrained += self.updateCellVar(neighbor, value, mode, filled_sing)
 
+        return constrained
 
     def updateCellVar(self, cell, value, mode, filled_sing):
         """
@@ -480,6 +546,8 @@ class SudokuBoard():
             if not self.sortedVariants[old_key_in_sort]:
                 self.setMinVarLen(self.getMinVarLen() + 1)
         # ELSE, UPDATE VARIANTS IN CELL AFTER ASSIGNMENT VALUE TO NEIGHBOR CELL, SO WE DELETE VALUE TO VARIANTS
+        # initialize constrained cells
+        constrained = 0
         if variants != filled_sing:
             if value in variants:
                 if mode == "removing":
@@ -492,8 +560,13 @@ class SudokuBoard():
                     self.sortedVariants[new_key].append(cell)
                     self.sortedVariants[old_key_in_sort].remove(cell)
                     self.ValuesVariants[row][col].remove(value)
+
                     if new_key < self.getMinVarLen():
                         self.setMinVarLen(new_key)
+
+                    # increment counter of constrained
+                    constrained += 1
+        return constrained
 
     def getQuadrantNeighbors(self, cell):
         """
@@ -613,8 +686,8 @@ def SudokuBoardTest():
 
     # test MRV
     # print TestBoard.MRV()
-    assert TestBoard.MRV() == ((7, 6), [3, 9]), "MVR failed for HB"
-    print "passed test MVR"
+    assert TestBoard.MRV() == ((7, 6), [3, 9]), "MRV failed for HB"
+    print "passed test MRV"
 
     # test getQuadrantNeighbors
     assert TestBoard.getQuadrantNeighbors((7, 6)) == [(6, 7), (6, 8), (8, 7), (8, 8)], "getQuadrantNeighbors failed for HB"
