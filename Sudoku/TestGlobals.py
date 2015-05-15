@@ -65,6 +65,29 @@ def definedNubmers_COMPLETE():
             definedNubmers[(row, col)] = ((row + col * 3) ) % 9 + 1
     return definedNubmers
 
+def _4x4_board(o = "x"):
+    return [[o, 1, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+
+            [o, o, o, 2, o, o, o, o, o, o, 15, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, 11, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o],
+            [o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o]]
+
+def conflicts4x4_board():
+    return ({0: {1: set([(0, 6), (0, 3), (0, 0)]), 4: set([(0, 1), (0, 7), (0, 4)]), 7: set([(0, 8), (0, 5), (0, 2)])}, 1: {8: set([(1, 2), (1, 5), (1, 8)]), 2: set([(1, 0), (1, 3), (1, 6)]), 5: set([(1, 1), (1, 4), (1, 7)])}, 2: {9: set([(2, 8), (2, 5), (2, 2)]), 3: set([(2, 0), (2, 6), (2, 3)]), 6: set([(2, 7), (2, 4), (2, 1)])}, 3: {1: set([(3, 8), (3, 2), (3, 5)]), 4: set([(3, 0), (3, 3), (3, 6)]), 7: set([(3, 7), (3, 1), (3, 4)])}, 4: {8: set([(4, 7), (4, 4), (4, 1)]), 2: set([(4, 5), (4, 2), (4, 8)]), 5: set([(4, 6), (4, 3), (4, 0)])}, 5: {9: set([(5, 1), (5, 4), (5, 7)]), 3: set([(5, 2), (5, 5), (5, 8)]), 6: set([(5, 6), (5, 0), (5, 3)])}, 6: {1: set([(6, 4), (6, 1), (6, 7)]), 4: set([(6, 2), (6, 8), (6, 5)]), 7: set([(6, 3), (6, 0), (6, 6)])}, 7: {8: set([(7, 3), (7, 6), (7, 0)]), 2: set([(7, 4), (7, 7), (7, 1)]), 5: set([(7, 5), (7, 8), (7, 2)])}, 8: {9: set([(8, 6), (8, 3), (8, 0)]), 3: set([(8, 1), (8, 7), (8, 4)]), 6: set([(8, 8), (8, 5), (8, 2)])}}, {}, {})
 
 # ANSWERS FOR TESTS
 def valuesVariants_answerHB():

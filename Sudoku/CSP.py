@@ -16,8 +16,8 @@ class CSP():
         # value = list of cells with appropriate variants lenght
         InitialCheck = board.preCompute()
         if InitialCheck != "Task checked OK":
-            print str(board)
-            return InitialCheck
+            # print InitialCheck
+            return board
         # run algorithm
         return self.RecursiveBacktracking(board, impossibleTag)
 
@@ -44,6 +44,9 @@ class CSP():
         return impossibleTag
 
 def CSPtest():
+    # test BacktrackingSearch
+    TestCSP = CSP()
+
     # test boards
     print "initialize test boards"
     TestBoard         = SudokuBoard(TestGlobals.definedNubmers_HB())
@@ -51,43 +54,45 @@ def CSPtest():
     TestEasyBoard     = SudokuBoard(TestGlobals.definedNubmers_EB())
     TestHB2           = SudokuBoard(TestGlobals.definedNubmers_HB2())
 
-    # test BacktrackingSearch
-    TestCSP = CSP()
 
-    print "\nBacktrackingSearch HB"
-    start_time = time.time()
-    answerHB = TestCSP.BacktrackingSearch(TestBoard)
-    print answerHB
-    assert answerHB.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
-    print "time to compute =",time.time() - start_time
+
+    # print "\nBacktrackingSearch HB"
+    # start_time = time.time()
+    # answerHB = TestCSP.BacktrackingSearch(TestBoard)
+    # print answerHB
+    # assert answerHB.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
+    # print "time to compute =",time.time() - start_time
 
     print "\nBacktrackingSearch EasyBoard"
     start_time = time.time()
     answerEB = TestCSP.BacktrackingSearch(TestEasyBoard)
-    print answerEB
-    assert answerEB.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
+    # print answerEB
+    assert answerEB.checkAll() == ({}, {}, {}), "incorrect EasyBoard solution"
     print "time to compute =",time.time() - start_time
 
     print "\nBacktrackingSearch HB2"
     start_time = time.time()
     answerHB2 = TestCSP.BacktrackingSearch(TestHB2)
-    print answerHB2
-    assert answerHB2.checkAll() == ({}, {}, {}), "incorrect HardBoard solution"
+    # print answerHB2
+    assert answerHB2.checkAll() == ({}, {}, {}), "incorrect HB2 solution"
     print "time to compute =",time.time() - start_time
 
     print "\nBacktrackingSearch INCORRECT_COMPLETE"
     asnwerINCORRECT_COMPLETE = TestCSP.BacktrackingSearch(TestCompleteBoard)
-    print asnwerINCORRECT_COMPLETE
+    assert asnwerINCORRECT_COMPLETE.checkAll() == TestGlobals.conflicts4x4_board(), "incorrect asnwerINCORRECT_COMPLETE checkall"
+    # print asnwerINCORRECT_COMPLETE
 
-    # print "BacktrackingSearch Easy Board"
-    # easySolution =  TestCSP.BacktrackingSearch(TestEasyBoard)
-    # easySolution.checkAll()
-    # print easySolution
+    # # 4x4 test
+    # Test4x4         = SudokuBoard(TestGlobals._4x4_board(), "x", range(1, 17))
+    # print "\nBacktrackingSearch answerTest4x4"
+    # start_time = time.time()
+    # answerTest4x4 = TestCSP.BacktrackingSearch(Test4x4)
+    # print answerTest4x4
+    # assert answerTest4x4.checkAll() == ({}, {}, {}), "incorrect answerTest4x4 solution"
+    # print "time to compute =",time.time() - start_time
 
-    # print "BacktrackingSearch HB2"
-    # hb2 = TestCSP.BacktrackingSearch(TestHB2)
-    # print hb2
-
+    print "\npassed test CSP"
 # run test
 if __name__ == "__main__":
     CSPtest()
+

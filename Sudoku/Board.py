@@ -19,6 +19,7 @@ class SudokuBoard():
         self.numbers = numbers
         self.dimension = len(numbers)
         self.quadDim = int(math.sqrt(self.dimension))
+        # print "len(numbers), self.quadDim", len(numbers), self.quadDim
         self.empty = undefinedSymbol
         self.board = []
         for row in range(self.dimension):
