@@ -394,8 +394,8 @@ class SudokuBoard():
             self.minVariantsLenght += 1
         else:
             self.minVariantsLenght = min_lenght
-        if self.minVariantsLenght == 0:
-            print "KARAUL! self.minVariantsLenght = 0"
+        # if self.minVariantsLenght == 0:
+        #     print "KARAUL! self.minVariantsLenght = 0"
 
     def getMinVarLen(self):
         return self.minVariantsLenght
@@ -452,10 +452,10 @@ class SudokuBoard():
         # 2 version
         cells = self.sortedVariants[self.getMinVarLen()]
         # values = [self.ValuesVariants[cell[0]][cell[1]] for cell in cells]
-        min_constrained = "inf"
+        # min_constrained = "inf"
         pairs = []
-        estimate_values = []
-        result = []
+        # estimate_values = []
+        # result = []
         # print "MRVandLCV cells", cells
         # if cells == [(4, 1), (6, 1), (8, 3)]:
         #     pass
@@ -467,13 +467,14 @@ class SudokuBoard():
                 board = self.copy()
                 constrained = board.setAndUpdate(cell, variant)
                 pairs.append((cell, variant, constrained))
-                estimate_values.append(constrained)
+                # estimate_values.append(constrained)
 
         # sort by estimate_values
         # print "unsorted pairs", pairs
         pairs.sort(key=lambda pairs: pairs[2])
-        print "sorted pairs", [(a, b) for a, b, c in pairs]
-        return  [(a, b) for a, b, c in pairs]
+        # print "sorted pairs", [(a, b) for a, b, c in pairs]
+        # print "[(cell, variant) for cell, variant, constrained in pairs]\n", [(cell, variant) for cell, variant, constrained in pairs]
+        return  [(cell, variant) for cell, variant, constrained in pairs]
 
 
     def updateVariants(self, cell, value, mode = "removing", filled_sing = "*"):

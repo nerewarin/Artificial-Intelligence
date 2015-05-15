@@ -43,11 +43,12 @@ class CSP():
                 return result
             # print "backup UndefinedSymbol in cell", cell
             mBoard.clearAndUpdate(cell)
-            return impossibleTag
+        return impossibleTag
 
         # # MRV + LCV version
         # for pair in board.MRVandLCV():
         #     cell, var = pair
+        #     # print "cell, var", cell, var
         #     # if var == "no more variants":
         #     #     return impossibleTag
         #     mBoard =  board.copy()
@@ -57,7 +58,7 @@ class CSP():
         #         return result
         #     # print "backup UndefinedSymbol in cell", cell
         #     mBoard.clearAndUpdate(cell)
-        #     return impossibleTag
+        # return impossibleTag
 
 def CSPtest():
     # test BacktrackingSearch
